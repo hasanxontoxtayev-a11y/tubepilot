@@ -3,17 +3,18 @@
   "globalEnv": [
     "LEMON_SQUEEZY_STORE_ID",
     "LEMON_SQUEEZY_PRO_VARIANT_ID",
-    "LEMON_SQUEEZY_API_KEY"
+    "LEMON_SQUEEZY_API_KEY",
+    "DATABASE_URL",
+    "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL",
+    "GEMINI_API_KEY",
+    "TELEGRAM_BOT_TOKEN"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": [
-        "LEMON_SQUEEZY_STORE_ID",
-        "LEMON_SQUEEZY_PRO_VARIANT_ID",
-        "LEMON_SQUEEZY_API_KEY"
-      ],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
