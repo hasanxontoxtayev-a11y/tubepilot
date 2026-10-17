@@ -1,0 +1,38 @@
+{
+  "name": "tubepilot-ai",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"web,bot\" -c \"magenta,cyan\" \"npm --workspace=@kanal/web run dev\" \"npm --workspace=@kanal/bot run dev\"",
+    "bot": "npm --workspace=@kanal/bot run dev",
+    "web": "npm --workspace=@kanal/web run dev",
+    "dev:web": "npm --workspace=@kanal/web run dev",
+    "dev:bot": "npm --workspace=@kanal/bot run dev",
+    "dev:worker": "npm --workspace=@kanal/worker run dev",
+    "build:extension": "node apps/extension/build.js",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "lucide-react": "^1.16.0",
+    "next": "^14.2.24",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^10.0.6",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  }
+}

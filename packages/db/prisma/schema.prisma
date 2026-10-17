@@ -1,0 +1,201 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// USER & AUTHENTICATION
+// -----------------------------------------------------------------------------
+
+model User {
+  id                    String              @id @default(uuid())
+  email                 String              @unique
+  name                  String?
+  avatarUrl             String?
+  preferredLanguage     String              @default("en")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  // Telegram synchronization
+  telegramUserId        BigInt?             @unique
+  telegramChatId        BigInt?
+  telegramUsername      String?
+  telegramPairToken     String?             @unique
+  telegramPairTokenExp  DateTime?
+
+  // Channel & YouTube data
+  channel               YouTubeChannel?
+
+  // Subscriptions & Billing
+  subscriptionTier      String              @default("FREE")
+  subscriptionStatus    String              @default("INACTIVE")
+  planPrice             Float               @default(0)
+  currentPeriodEnd      DateTime?
+  customerId            String?
+  subscriptionProvider  String?
+  subscriptions         Subscription[]
+
+  // AI activities
+  commentThreads        CommentThread[]
+  thumbnailEvaluations  ThumbnailEvaluation[]
+
+  @@index([telegramUserId])
+  @@index([telegramPairToken])
+}
+
+// -----------------------------------------------------------------------------
+// YOUTUBE CHANNEL & ENCRYPTED OAUTH TOKENS
+// -----------------------------------------------------------------------------
+
+model YouTubeChannel {
+  id                    String              @id // YouTube Channel ID (e.g. UC...)
+  userId                String              @unique
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title                 String
+  description           String?
+  customUrl             String?
+  thumbnailUrl          String?
+  publishedAt           DateTime?
+  subscriberCount       BigInt              @default(0)
+  videoCount            Int                 @default(0)
+  viewCount             BigInt              @default(0)
+
+  // Encrypted tokens (AES-256-GCM encrypted strings)
+  encryptedAccessToken  String
+  encryptedRefreshToken String
+  tokenExpiresAt        DateTime
+  tokenScope            String
+
+  // PubSubHubbub (WebSub) subscription lease
+  webSubLeaseExpiresAt  DateTime?
+
+  // Peak posting time aggregated analysis cache
+  postingHeatmapJson    String?             // 7x24 matrix of peak audience activity (JSON string)
+  lastHeatmapCalculated DateTime?
+
+  videos                YouTubeVideo[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([userId])
+}
+
+model YouTubeVideo {
+  id                    String              @id // YouTube Video ID
+  channelId             String
+  channel               YouTubeChannel      @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  title                 String
+  description           String?
+  publishedAt           DateTime
+  thumbnailDefaultUrl   String
+  thumbnailHighUrl      String?
+
+  viewCount             BigInt              @default(0)
+  likeCount             BigInt              @default(0)
+  commentCount          Int                 @default(0)
+
+  comments              CommentThread[]
+  evaluations           ThumbnailEvaluation[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([channelId, publishedAt])
+}
+
+// -----------------------------------------------------------------------------
+// COMMENT COPILOT (HUMAN-IN-THE-LOOP APPROVAL)
+// -----------------------------------------------------------------------------
+
+model CommentThread {
+  id                    String                @id // YouTube Comment ID
+  videoId               String
+  video                 YouTubeVideo          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  userId                String
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  authorDisplayName     String
+  authorProfileImageUrl String?
+  authorChannelId       String?
+  originalText          String
+  detectedLanguage      String?               // e.g. "fr", "hi", "ru", "uz", "en"
+  publishedAt           DateTime
+
+  // AI draft state
+  aiDraftReply          String?
+  finalApprovedReply    String?
+  approvalStatus        String                @default("PENDING")
+  approvedVia           String?               // "WEB" or "TELEGRAM"
+  approvedAt            DateTime?
+  postedToYouTubeAt     DateTime?
+  errorMessage          String?
+
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([userId, approvalStatus])
+  @@index([videoId])
+}
+
+// -----------------------------------------------------------------------------
+// THUMBNAIL EVALUATOR (GEMINI MULTIMODAL VISION)
+// -----------------------------------------------------------------------------
+
+model ThumbnailEvaluation {
+  id                    String                    @id @default(uuid())
+  userId                String
+  user                  User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoId               String?
+  video                 YouTubeVideo?             @relation(fields: [videoId], references: [id], onDelete: SetNull)
+
+  imageUrl              String
+  source                String                    @default("MANUAL_WEB")
+
+  // Gemini Structured Analysis
+  predictedCtrScore     Int                       // 1 to 100
+  contrastRating        String                    // "POOR", "AVERAGE", "EXCELLENT"
+  contrastFeedback      String
+  readabilityRating     String                    // "POOR", "AVERAGE", "EXCELLENT"
+  readabilityFeedback   String
+  focalPointAnalysis    String
+  actionableFixes       String?                   // Array of concrete tips stored as JSON string
+  rawAiResponse         String?
+
+  notifiedTelegramAt    DateTime?
+  createdAt             DateTime                  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// -----------------------------------------------------------------------------
+// BILLING & MULTI-GATEWAY SUBSCRIPTIONS
+// -----------------------------------------------------------------------------
+
+model Subscription {
+  id                    String              @id @default(uuid())
+  userId                String
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider              String
+  providerSubscriptionId String?            @unique // e.g., Stripe sub_..., PayPal I-...
+  providerCustomerId   String?             // e.g., Stripe cus_...
+  tier                  String              @default("PRO")
+  status                String              @default("ACTIVE")
+
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean             @default(false)
+
+  // Payment receipts & transaction audits
+  metadata              String?             // JSON string
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([userId, status])
+}

@@ -1,0 +1,6 @@
+{
+  "/api/channels/current/route": "app/api/channels/current/route.js",
+  "/api/channels/audit/route": "app/api/channels/audit/route.js",
+  "/api/telegram/status/route": "app/api/telegram/status/route.js",
+  "/[locale]/dashboard/page": "app/[locale]/dashboard/page.js"
+}

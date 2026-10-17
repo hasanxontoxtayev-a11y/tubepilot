@@ -1,0 +1,486 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import {
+  Check,
+  X,
+  Sparkles,
+  Zap,
+  Crown,
+  Shield,
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  Youtube,
+  BarChart3,
+  Bot,
+  Flame,
+  HelpCircle,
+} from 'lucide-react';
+
+export default function PricingPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'uz';
+  const t = useTranslations('pricing');
+  const tNav = useTranslations('nav');
+
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [currentTier, setCurrentTier] = useState<'FREE' | 'PRO' | 'ELITE'>('FREE');
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/channels/current')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.subscription?.tier) {
+          setCurrentTier(data.subscription.tier as 'FREE' | 'PRO' | 'ELITE');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSelectTier = async (tier: 'FREE' | 'PRO' | 'ELITE') => {
+    if (tier === currentTier) return;
+    setLoadingTier(tier);
+    setToastMessage(null);
+
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier,
+          interval: isAnnual ? 'annual' : 'monthly',
+          simulate: false,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      if (data.success) {
+        setCurrentTier(tier);
+        setToastMessage(`${tier} ${t('switchSuccess')}`);
+        setTimeout(() => setToastMessage(null), 4000);
+      }
+    } catch (err) {
+      console.error('Upgrade error:', err);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-gray-100 flex flex-col selection:bg-rose-500 selection:text-white">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-40 w-full border-b border-gray-800/80 bg-black/70 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href={`/${locale}/dashboard`} className="flex items-center gap-2 group">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-600 to-red-500 flex items-center justify-center shadow-lg shadow-rose-950/40 group-hover:scale-105 transition-transform">
+                <Youtube className="w-4 h-4 text-white fill-white" />
+              </div>
+              <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                TubePilot <span className="text-rose-500 font-black">AI</span>
+              </span>
+            </Link>
+
+            <nav className="hidden md:flex items-center gap-4 text-xs font-semibold text-gray-400">
+              <Link
+                href={`/${locale}/dashboard`}
+                className="hover:text-white transition-colors"
+              >
+                {tNav('dashboard')}
+              </Link>
+              <span className="text-rose-400 font-bold border-b-2 border-rose-500 pb-0.5">
+                {tNav('pricing')}
+              </span>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <LocaleSwitcher />
+            <Link
+              href={`/${locale}/dashboard`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Panelga qaytish</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        {/* Hero */}
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold mb-4 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5" />
+            VidIQ & TubeBuddy Alternative
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            {t('title')}
+          </h1>
+          <p className="mt-4 text-base sm:text-lg text-gray-400">
+            {t('subtitle')}
+          </p>
+
+          {/* Toggle */}
+          <div className="mt-8 inline-flex items-center p-1.5 bg-gray-900 border border-gray-800 rounded-full shadow-inner">
+            <button
+              onClick={() => setIsAnnual(false)}
+              className={`px-5 py-2 text-xs sm:text-sm font-semibold rounded-full transition-all ${
+                !isAnnual
+                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {t('monthly')}
+            </button>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className={`px-5 py-2 text-xs sm:text-sm font-semibold rounded-full transition-all flex items-center gap-2 ${
+                isAnnual
+                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {t('annual')}
+              <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 font-bold">
+                {t('savePercent')}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Toast */}
+        {toastMessage && (
+          <div className="max-w-md mx-auto mb-8 p-3.5 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-400 text-sm font-semibold flex items-center justify-center gap-2 shadow-xl animate-in fade-in">
+            <CheckCircle2 className="w-5 h-5" />
+            {toastMessage}
+          </div>
+        )}
+
+        {/* 3 Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-20">
+          {/* STARTER */}
+          <div
+            className={`rounded-3xl border p-8 flex flex-col justify-between transition-all backdrop-blur-xl ${
+              currentTier === 'FREE'
+                ? 'bg-gray-900/80 border-gray-700 shadow-xl ring-1 ring-gray-700'
+                : 'bg-gray-950/60 border-gray-850 hover:border-gray-700'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-gray-200 uppercase tracking-wider">
+                  {t('starter.name')}
+                </h3>
+                {currentTier === 'FREE' && (
+                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-gray-800 text-gray-300 rounded-full border border-gray-700">
+                    {t('currentPlan')}
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-4xl font-black text-white">{t('starter.price')}</span>
+                <span className="text-sm text-gray-500">{t('freeForever')}</span>
+              </div>
+              <p className="mt-3 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                {t('starter.desc')}
+              </p>
+
+              <div className="mt-8 space-y-3.5 border-t border-gray-800/80 pt-6">
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{t('starter.f1')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{t('starter.f2')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{t('starter.f3')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{t('starter.f4')}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <button
+                disabled={currentTier === 'FREE' || loadingTier !== null}
+                onClick={() => handleSelectTier('FREE')}
+                className={`w-full py-3 px-5 rounded-2xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                  currentTier === 'FREE'
+                    ? 'bg-gray-800/80 text-gray-400 cursor-default'
+                    : 'bg-gray-800 hover:bg-gray-700 text-white'
+                }`}
+              >
+                {loadingTier === 'FREE' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : currentTier === 'FREE' ? (
+                  t('currentPlan')
+                ) : (
+                  t('starter.cta')
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* PRO (MOST POPULAR) */}
+          <div
+            className={`relative rounded-3xl border p-8 flex flex-col justify-between transition-all backdrop-blur-xl md:-translate-y-2 shadow-2xl ${
+              currentTier === 'PRO'
+                ? 'bg-gradient-to-b from-rose-950/50 via-gray-900 to-black border-rose-500 ring-2 ring-rose-500/40'
+                : 'bg-gradient-to-b from-rose-950/30 via-gray-900 to-black border-rose-500/60 hover:border-rose-400'
+            }`}
+          >
+            {/* Badge */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-rose-500 to-red-600 text-white text-xs font-black shadow-lg uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 fill-white" />
+              {t('popular')}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-rose-400 uppercase tracking-wider">
+                  {t('pro.name')}
+                </h3>
+                {currentTier === 'PRO' && (
+                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-rose-500/20 text-rose-300 rounded-full border border-rose-500/40">
+                    {t('currentPlan')}
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-4xl font-black text-white">
+                  {isAnnual ? t('pro.priceAnnual') : t('pro.price')}
+                </span>
+                <span className="text-sm text-gray-400">{t('perMonth')}</span>
+              </div>
+              <p className="mt-3 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                {t('pro.desc')}
+              </p>
+
+              <div className="mt-8 space-y-3.5 border-t border-rose-500/20 pt-6">
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
+                  <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span className="font-semibold text-white">{t('pro.f1')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
+                  <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span>{t('pro.f2')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
+                  <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span>{t('pro.f3')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
+                  <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span>{t('pro.f4')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
+                  <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span>{t('pro.f5')}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <button
+                disabled={currentTier === 'PRO' || loadingTier !== null}
+                onClick={() => handleSelectTier('PRO')}
+                className={`w-full py-3.5 px-5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-xl shadow-rose-950/60 ${
+                  currentTier === 'PRO'
+                    ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40 cursor-default'
+                    : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white'
+                }`}
+              >
+                {loadingTier === 'PRO' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : currentTier === 'PRO' ? (
+                  t('currentPlan')
+                ) : (
+                  <>
+                    {t('pro.cta')}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* ELITE (ULTIMATE POWER) */}
+          <div
+            className={`relative rounded-3xl border p-8 flex flex-col justify-between transition-all backdrop-blur-xl shadow-2xl ${
+              currentTier === 'ELITE'
+                ? 'bg-gradient-to-b from-purple-950/50 via-gray-900 to-black border-purple-500 ring-2 ring-purple-500/40'
+                : 'bg-gradient-to-b from-purple-950/30 via-gray-900 to-black border-purple-500/40 hover:border-purple-400'
+            }`}
+          >
+            {/* Ultimate Badge */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-black shadow-lg uppercase tracking-wider flex items-center gap-1.5">
+              <Crown className="w-3.5 h-3.5 fill-white" />
+              {t('ultimate')}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-purple-400 uppercase tracking-wider">
+                  {t('elite.name')}
+                </h3>
+                {currentTier === 'ELITE' && (
+                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/40">
+                    {t('currentPlan')}
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-4xl font-black text-white">
+                  {isAnnual ? t('elite.priceAnnual') : t('elite.price')}
+                </span>
+                <span className="text-sm text-gray-400">{t('perMonth')}</span>
+              </div>
+              <p className="mt-3 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                {t('elite.desc')}
+              </p>
+
+              <div className="mt-8 space-y-3.5 border-t border-purple-500/20 pt-6">
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-purple-200">
+                  <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span className="font-semibold text-white">{t('elite.f1')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-purple-200">
+                  <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span className="font-semibold text-white">{t('elite.f2')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-purple-200">
+                  <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span>{t('elite.f3')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-purple-200">
+                  <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span>{t('elite.f4')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-purple-200">
+                  <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span>{t('elite.f5')}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <button
+                disabled={currentTier === 'ELITE' || loadingTier !== null}
+                onClick={() => handleSelectTier('ELITE')}
+                className={`w-full py-3.5 px-5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-xl shadow-purple-950/60 ${
+                  currentTier === 'ELITE'
+                    ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40 cursor-default'
+                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white'
+                }`}
+              >
+                {loadingTier === 'ELITE' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : currentTier === 'ELITE' ? (
+                  t('currentPlan')
+                ) : (
+                  <>
+                    {t('elite.cta')}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Comparison Matrix */}
+        <div className="max-w-4xl mx-auto mb-20 bg-gray-900/40 border border-gray-800 rounded-3xl p-6 sm:p-8 backdrop-blur-sm">
+          <h2 className="text-xl sm:text-2xl font-bold text-white text-center mb-6">
+            VidIQ & TubeBuddy imkoniyatlari taqqoslash
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-gray-800 text-gray-400">
+                  <th className="py-3 px-4 font-semibold">Funksiya</th>
+                  <th className="py-3 px-4 font-semibold text-center">Starter ($0)</th>
+                  <th className="py-3 px-4 font-semibold text-center text-rose-400">Pro ($19)</th>
+                  <th className="py-3 px-4 font-semibold text-center text-purple-400">Elite ($49)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800/60 text-gray-300">
+                <tr>
+                  <td className="py-3 px-4 font-medium">Ulangan YouTube kanallar</td>
+                  <td className="py-3 px-4 text-center">1 ta</td>
+                  <td className="py-3 px-4 text-center text-rose-300 font-semibold">3 ta</td>
+                  <td className="py-3 px-4 text-center text-purple-300 font-semibold">Cheksiz</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-medium">Gemini 2.0 Flash Muqova AI Vision</td>
+                  <td className="py-3 px-4 text-center text-gray-500">3 marta/kun</td>
+                  <td className="py-3 px-4 text-center text-emerald-400">Cheksiz</td>
+                  <td className="py-3 px-4 text-center text-emerald-400">Cheksiz + Prioritet</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-medium">Ko'p tilli Izohlar AI Kopiloti</td>
+                  <td className="py-3 px-4 text-center text-gray-500">Oddiy</td>
+                  <td className="py-3 px-4 text-center text-emerald-400">Avtomatik ovoz moslashuvi</td>
+                  <td className="py-3 px-4 text-center text-emerald-400">Avto-yuborish + Telegram</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-medium">Real-time VPH (soatlik tomoshalar)</td>
+                  <td className="py-3 px-4 text-center text-gray-500"><X className="w-4 h-4 mx-auto text-gray-600" /></td>
+                  <td className="py-3 px-4 text-center text-emerald-400"><Check className="w-4 h-4 mx-auto text-emerald-400" /></td>
+                  <td className="py-3 px-4 text-center text-emerald-400"><Check className="w-4 h-4 mx-auto text-emerald-400" /></td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-medium">Raqobatchilarni to'liq josuslik qilish (Spy)</td>
+                  <td className="py-3 px-4 text-center text-gray-500"><X className="w-4 h-4 mx-auto text-gray-600" /></td>
+                  <td className="py-3 px-4 text-center text-gray-500"><X className="w-4 h-4 mx-auto text-gray-600" /></td>
+                  <td className="py-3 px-4 text-center text-purple-400 font-bold"><Check className="w-4 h-4 mx-auto text-purple-400" /></td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-medium">Telegram VIP Bot signallari va ogohlantirishlar</td>
+                  <td className="py-3 px-4 text-center text-gray-500"><X className="w-4 h-4 mx-auto text-gray-600" /></td>
+                  <td className="py-3 px-4 text-center text-emerald-400">Asosiy</td>
+                  <td className="py-3 px-4 text-center text-purple-400 font-bold">VIP 24/7 Signallar</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Guarantees */}
+        <div className="max-w-3xl mx-auto text-center border-t border-gray-800 pt-8 text-xs sm:text-sm text-gray-400 flex flex-col sm:flex-row items-center justify-center gap-6">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-emerald-400" />
+            <span>30-kunlik to'liq qaytarish kafolati</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5 text-rose-500" />
+            <span>Istalgan vaqt 1 bosishda bekor qilish</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-400" />
+            <span>Tezkor hisobga biriktirish</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

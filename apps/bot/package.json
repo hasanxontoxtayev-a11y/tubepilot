@@ -1,0 +1,20 @@
+{
+  "name": "@kanal/bot",
+  "version": "1.0.0",
+  "main": "src/bot.ts",
+  "scripts": {
+    "dev": "tsx watch src/bot.ts",
+    "bot": "tsx watch src/bot.ts",
+    "start": "node dist/bot.js"
+  },
+  "dependencies": {
+    "@kanal/db": "*",
+    "@kanal/youtube": "*",
+    "grammy": "^1.31.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
