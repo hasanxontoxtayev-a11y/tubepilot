@@ -1,8 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "LEMON_SQUEEZY_STORE_ID",
+    "LEMON_SQUEEZY_PRO_VARIANT_ID",
+    "LEMON_SQUEEZY_API_KEY"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "LEMON_SQUEEZY_STORE_ID",
+        "LEMON_SQUEEZY_PRO_VARIANT_ID",
+        "LEMON_SQUEEZY_API_KEY"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "lint": {
