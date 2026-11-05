@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import {
   Search,
   CheckCircle2,
@@ -52,11 +53,66 @@ export function ChannelAudit({
   subscriptionTier = 'FREE',
   onUpgradeClick,
 }: ChannelAuditProps = {}) {
+  const params = useParams();
+  const currentLocale = (params?.locale as string) || 'uz';
   const initialHandle = connectedHandle || connectedChannel?.handle || '@vclora-p5n';
   const [query, setQuery] = useState(initialHandle);
   const [loading, setLoading] = useState(false);
   const [auditData, setAuditData] = useState<any>(null);
   const [showCompetitorSpy, setShowCompetitorSpy] = useState(false);
+
+  // Helper translations for dynamic audit data
+  const tTitle = (title: string) => {
+    if (currentLocale === 'uz') {
+      if (title.includes('Mobile Title Length')) return 'Mobil Sarlavha Uzunligi Cheklovi';
+      if (title.includes('Search Intent')) return 'Qidiruv Mavzusi va Kalit So\'zlar (SEO)';
+      if (title.includes('Thumbnail Focal Point')) return 'Muqova Markazi va Rang Kontrasti';
+      if (title.includes('Channel Description')) return 'Kanal Tavsifi va Metama\'lumotlar';
+      if (title.includes('Release Velocity')) return 'Video Chiqarish Sur\'ati va Izchilligi';
+    }
+    if (currentLocale === 'ru') {
+      if (title.includes('Mobile Title Length')) return 'Длина заголовка для мобильных';
+      if (title.includes('Search Intent')) return 'Поисковый интент и SEO-ключи';
+      if (title.includes('Thumbnail Focal Point')) return 'Фокус и контраст обложки';
+      if (title.includes('Channel Description')) return 'Описание канала и метаданные';
+      if (title.includes('Release Velocity')) return 'Регулярность и частота публикаций';
+    }
+    return title;
+  };
+
+  const tDesc = (desc: string) => {
+    if (currentLocale === 'uz') {
+      if (desc.includes('Upload titles average')) return 'Sarlavhalar mobil telefon ekranida qulay o\'qilishi uchun 50 ta belgidan oshmasligi kerak.';
+      if (desc.includes('High-intent keywords')) return 'Auditoriya qidiruvlariga mos keluvchi yuqori talabli viral kalit so\'zlar to\'g\'ri joylashtirilgan.';
+      if (desc.includes('High visual isolation')) return 'Mobil tasmada e\'tiborni tortish uchun yuqori kontrast va yirik yuz ifodasi optimallashtirilgan.';
+      if (desc.includes('Comprehensive channel overview')) return 'Kanal tavsifi YouTube va Google qidiruv tizimlarida to\'liq indekslangan.';
+      if (desc.includes('Active library of')) return 'Kanalda muntazam va doimiy auditoriyani qaytaruvchi faol video kutubxonasi mavjud.';
+    }
+    if (currentLocale === 'ru') {
+      if (desc.includes('Upload titles average')) return 'Заголовки не должны превышать 50 символов для идеального чтения на смартфонах.';
+      if (desc.includes('High-intent keywords')) return 'Ключевые слова соответствуют поисковым запросам и интересу зрителей.';
+      if (desc.includes('High visual isolation')) return 'Обложки оптимизированы по контрасту и яркости для мобильной ленты YouTube.';
+      if (desc.includes('Comprehensive channel overview')) return 'Описание канала полностью проиндексировано в YouTube и Google.';
+      if (desc.includes('Active library of')) return 'Активная библиотека видео с регулярным возвратом постоянных зрителей.';
+    }
+    return desc;
+  };
+
+  const tRec = (rec: string, index: number) => {
+    if (currentLocale === 'uz') {
+      if (index === 0 || rec.includes('titles')) return 'Video sarlavhalarini mobil qurilmalarda kesilib qolmasligi uchun 50 ta belgidan oshirmang.';
+      if (index === 1 || rec.includes('Pin author')) return 'Dastlabki 15 daqiqa ichida o\'z izohingizni yuqoriga qadab qo\'ying (bu algoritm faolligini 2x oshiradi).';
+      if (index === 2 || rec.includes('multi-language')) return 'Xorijiy auditoriya va ko\'proq tomosha jalb qilish uchun TubePilot AI orqali ko\'p tilli sarlavha va tavsiflardan foydalaning.';
+      if (index === 3 || rec.includes('Shorts')) return 'Eng qiziqarli lahzalarni YouTube Shorts formatida qirqib olib, asosiy to\'liq videolarga havola bering.';
+    }
+    if (currentLocale === 'ru') {
+      if (index === 0 || rec.includes('titles')) return 'Сокращайте заголовки до 50 символов, чтобы они не обрезались на смартфонах.';
+      if (index === 1 || rec.includes('Pin author')) return 'Закрепляйте комментарий автора в первые 15 минут для мощного старта просмотров.';
+      if (index === 2 || rec.includes('multi-language')) return 'Используйте многоязычные названия через TubePilot AI для выхода на мировую аудиторию.';
+      if (index === 3 || rec.includes('Shorts')) return 'Создавайте YouTube Shorts из лучших моментов со ссылкой на длинное видео.';
+    }
+    return rec;
+  };
 
   const fetchAudit = async (targetQuery: string) => {
     setLoading(true);
@@ -610,8 +666,8 @@ export function ChannelAudit({
                     {item.status === 'warn' && <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />}
                     {item.status === 'fail' && <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />}
                     <div>
-                      <h5 className="text-xs font-bold text-gray-200">{item.title}</h5>
-                      <p className="text-[11px] text-gray-400 leading-relaxed mt-0.5">{item.description}</p>
+                      <h5 className="text-xs font-bold text-gray-200">{tTitle(item.title)}</h5>
+                      <p className="text-[11px] text-gray-400 leading-relaxed mt-0.5">{tDesc(item.description)}</p>
                     </div>
                   </div>
                 ))}
@@ -663,9 +719,11 @@ export function ChannelAudit({
           <div className="p-6 rounded-2xl bg-gradient-to-r from-rose-950/30 via-dark-900 to-sky-950/30 border border-dark-700 space-y-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-rose-400" />
-              <h4 className="text-sm font-bold text-white">Gemini AI Prescriptive Growth Directives</h4>
+              <h4 className="text-sm font-bold text-white">
+                {currentLocale === 'uz' ? 'Kanalni O\'stirish Bo\'yicha Gemini AI Ko\'rsatmalari' : currentLocale === 'ru' ? 'Рекомендации по росту от Gemini AI' : 'Gemini AI Prescriptive Growth Directives'}
+              </h4>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-semibold border border-rose-500/20">
-                Actionable Next Steps
+                {currentLocale === 'uz' ? 'Amaliy Qadamlar' : currentLocale === 'ru' ? 'Практические шаги' : 'Actionable Next Steps'}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
@@ -674,7 +732,7 @@ export function ChannelAudit({
                   <span className="w-5 h-5 rounded-full bg-rose-500/10 text-rose-400 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                     {index + 1}
                   </span>
-                  <p className="text-xs text-gray-300 leading-relaxed">{rec}</p>
+                  <p className="text-xs text-gray-300 leading-relaxed">{tRec(rec, index)}</p>
                 </div>
               ))}
             </div>
