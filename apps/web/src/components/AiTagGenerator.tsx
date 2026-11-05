@@ -57,20 +57,38 @@ export function AiTagGenerator({
 
     setLoading(true);
     setSearchCount((prev) => prev + 1);
-    // Dynamic generation simulation or API hook
-    setTimeout(() => {
-      const q = query.trim().toLowerCase();
-      const newGenerated: TagItem[] = [
-        { tag: `${q} trend 2026`, score: 96, competition: 'LOW', volume: '110K/oy' },
-        { tag: `${q} sirlari`, score: 91, competition: 'LOW', volume: '64K/oy' },
-        { tag: `${q} tezkor o'sish`, score: 87, competition: 'MEDIUM', volume: '125K/oy' },
-        { tag: `${q} haqida to'liq`, score: 84, competition: 'LOW', volume: '45K/oy' },
+
+    try {
+      const res = await fetch(`/api/tags/generate?q=${encodeURIComponent(query.trim())}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.tags) && data.tags.length > 0) {
+        setTags(data.tags);
+      } else {
+        // Fallback generator
+        const q = query.trim();
+        setTags([
+          { tag: `${q}`, score: 98, competition: 'LOW', volume: '140K/oy' },
+          { tag: `${q} trend 2026`, score: 94, competition: 'LOW', volume: '110K/oy' },
+          { tag: `eng zo'r ${q}`, score: 89, competition: 'LOW', volume: '88K/oy' },
+          { tag: `${q} haqida`, score: 86, competition: 'MEDIUM', volume: '65K/oy' },
+          { tag: `${q} sirlari`, score: 84, competition: 'LOW', volume: '45K/oy' },
+          { tag: `${q} tahlili`, score: 82, competition: 'MEDIUM', volume: '95K/oy' },
+        ]);
+      }
+    } catch (err) {
+      console.warn('API error, using local fallback:', err);
+      const q = query.trim();
+      setTags([
+        { tag: `${q}`, score: 98, competition: 'LOW', volume: '140K/oy' },
+        { tag: `${q} trend 2026`, score: 94, competition: 'LOW', volume: '110K/oy' },
         { tag: `eng zo'r ${q}`, score: 89, competition: 'LOW', volume: '88K/oy' },
+        { tag: `${q} haqida`, score: 86, competition: 'MEDIUM', volume: '65K/oy' },
+        { tag: `${q} sirlari`, score: 84, competition: 'LOW', volume: '45K/oy' },
         { tag: `${q} tahlili`, score: 82, competition: 'MEDIUM', volume: '95K/oy' },
-      ];
-      setTags(newGenerated);
+      ]);
+    } finally {
       setLoading(false);
-    }, 700);
+    }
   };
 
   const copyAllTags = () => {
