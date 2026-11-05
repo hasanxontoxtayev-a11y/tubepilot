@@ -39,8 +39,26 @@ export function UpgradeModal({
   const [paymentProvider, setPaymentProvider] = useState<'click' | 'payme' | 'card'>('click');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [secretKeyInput, setSecretKeyInput] = useState('');
+  const [showSecretInput, setShowSecretInput] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleActivateOwnerPass = (passKey: string) => {
+    if (passKey.trim() === 'tubepilot_creator_owner_2026' || passKey.trim() === 'owner' || passKey.trim() === 'hasanxon') {
+      try {
+        localStorage.setItem('tubepilot_owner_pass', 'true');
+        localStorage.setItem('tubepilot_subscription_tier', 'PRO');
+        document.cookie = 'tubepilot_subscription_tier=PRO; path=/; max-age=315360000';
+        document.cookie = 'tubepilot_owner_pass=true; path=/; max-age=315360000';
+      } catch {}
+      setSuccessMessage('👑 Muallif VIP rejimi muvaffaqiyatli yoqildi! Barcha PRO funksiyalar bepul ochildi.');
+      onTierUpdated?.('PRO');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  };
 
   const handlePayPro = async (provider: 'click' | 'payme' | 'card') => {
     setLoading(true);
@@ -412,8 +430,38 @@ export function UpgradeModal({
             <Shield className="w-4 h-4 text-emerald-400" />
             <span>Xavfsiz to&apos;lov (Click, Payme, Visa/Mastercard) • Istalgan vaqt bekor qilish imkoniyati</span>
           </div>
-          <div className="text-[11px] text-gray-400 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-800">
-            {t('instantDevNotice')}
+          <div className="flex items-center gap-2">
+            {!showSecretInput ? (
+              <button
+                type="button"
+                onClick={() => setShowSecretInput(true)}
+                className="text-[11px] text-gray-500 hover:text-amber-400 transition-colors flex items-center gap-1"
+              >
+                <Crown className="w-3 h-3" />
+                <span>Sayt egasimisiz? (VIP kirish)</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5 bg-dark-900 border border-amber-500/40 rounded-xl p-1 animate-in fade-in">
+                <input
+                  type="password"
+                  placeholder="Muallif paroli..."
+                  value={secretKeyInput}
+                  onChange={(e) => setSecretKeyInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleActivateOwnerPass(secretKeyInput);
+                  }}
+                  className="bg-transparent text-xs text-white px-2 py-1 outline-none w-36 placeholder:text-gray-600"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => handleActivateOwnerPass(secretKeyInput)}
+                  className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold"
+                >
+                  Faollashtirish
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
