@@ -275,7 +275,7 @@ export function UpgradeModal({
 
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-3xl sm:text-4xl font-black text-white">
-                  {isAnnual ? '$15' : '$19'}
+                  $19
                 </span>
                 <span className="text-xs text-gray-400">{t('perMonth')}</span>
                 <span className="ml-auto text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

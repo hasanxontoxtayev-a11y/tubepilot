@@ -181,33 +181,6 @@ function PricingContent() {
           <p className="mt-4 text-base sm:text-lg text-gray-400">
             {t('subtitle')}
           </p>
-
-          {/* Toggle */}
-          <div className="mt-8 inline-flex items-center p-1.5 bg-gray-900 border border-gray-800 rounded-full shadow-inner">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2 text-xs sm:text-sm font-semibold rounded-full transition-all ${
-                !isAnnual
-                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('monthly')}
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2 text-xs sm:text-sm font-semibold rounded-full transition-all flex items-center gap-2 ${
-                isAnnual
-                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('annual')}
-              <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 font-bold">
-                {t('savePercent')}
-              </span>
-            </button>
-          </div>
         </div>
 
         {/* Toast */}
@@ -328,7 +301,7 @@ function PricingContent() {
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-4xl font-black text-white">
-                  {isAnnual ? '$15' : '$19'}
+                  $19
                 </span>
                 <span className="text-sm text-gray-400">{t('perMonth')}</span>
                 <span className="ml-auto text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
