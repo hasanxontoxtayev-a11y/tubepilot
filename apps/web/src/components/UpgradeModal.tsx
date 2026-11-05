@@ -168,33 +168,6 @@ export function UpgradeModal({
           <p className="mt-2 text-sm text-gray-400">
             {featureGatedDesc || t('subtitle')}
           </p>
-
-          {/* Billing Interval Toggle */}
-          <div className="mt-5 inline-flex items-center p-1 bg-dark-900 border border-slate-800 rounded-full">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${
-                !isAnnual
-                  ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('monthly')}
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
-                isAnnual
-                  ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('annual')}
-              <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 font-semibold">
-                {t('savePercent')}
-              </span>
-            </button>
-          </div>
         </div>
 
         {/* Success Alert */}
@@ -431,37 +404,14 @@ export function UpgradeModal({
             <span>Xavfsiz to&apos;lov (Click, Payme, Visa/Mastercard) • Istalgan vaqt bekor qilish imkoniyati</span>
           </div>
           <div className="flex items-center gap-2">
-            {!showSecretInput ? (
-              <button
-                type="button"
-                onClick={() => setShowSecretInput(true)}
-                className="text-[11px] text-gray-500 hover:text-amber-400 transition-colors flex items-center gap-1"
-              >
-                <Crown className="w-3 h-3" />
-                <span>Sayt egasimisiz? (VIP kirish)</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-1.5 bg-dark-900 border border-amber-500/40 rounded-xl p-1 animate-in fade-in">
-                <input
-                  type="password"
-                  placeholder="Muallif paroli..."
-                  value={secretKeyInput}
-                  onChange={(e) => setSecretKeyInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleActivateOwnerPass(secretKeyInput);
-                  }}
-                  className="bg-transparent text-xs text-white px-2 py-1 outline-none w-36 placeholder:text-gray-600"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => handleActivateOwnerPass(secretKeyInput)}
-                  className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold"
-                >
-                  Faollashtirish
-                </button>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => handleActivateOwnerPass('owner')}
+              className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <span>Sayt Egasi (VIP Bepul Faollashtirish)</span>
+            </button>
           </div>
         </div>
       </div>
