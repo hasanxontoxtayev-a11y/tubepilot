@@ -171,8 +171,9 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html lang={locale} className="dark">
+    <html lang={locale} translate="no" className="dark notranslate">
       <head>
+        <meta name="google" content="notranslate" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
