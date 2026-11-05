@@ -147,6 +147,23 @@ export async function GET(req: NextRequest) {
     }
 
     const response = NextResponse.redirect(targetUrl);
+    
+    // Check if the logging in user is the owner (creator of TubePilot)
+    const userEmail = userInfo.data.email?.toLowerCase();
+    const isOwner = userEmail === 'hasanxontoxtayev@gmail.com';
+    const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
+
+    if (isOwner) {
+      response.cookies.set('tubepilot_subscription_tier', 'PRO', {
+        path: '/',
+        maxAge: TEN_YEARS,
+      });
+      response.cookies.set('tubepilot_owner_pass', 'true', {
+        path: '/',
+        maxAge: TEN_YEARS,
+      });
+    }
+
     if (activeUserId) {
       response.cookies.set('kanal_user_id', activeUserId, {
         path: '/',
