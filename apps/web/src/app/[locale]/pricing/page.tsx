@@ -264,6 +264,18 @@ function PricingContent() {
                   <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{tStarter('f4')}</span>
                 </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{tStarter('f5')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-500">
+                  <X className="w-4 h-4 text-gray-600 shrink-0 mt-0.5" />
+                  <span className="line-through">{tPro('f3')}</span>
+                </div>
+                <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-500">
+                  <X className="w-4 h-4 text-gray-600 shrink-0 mt-0.5" />
+                  <span className="line-through">{tPro('f4')}</span>
+                </div>
               </div>
             </div>
 
@@ -334,23 +346,23 @@ function PricingContent() {
                 </div>
                 <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{tPro('f2')}</span>
+                  <span className="font-semibold text-white">{tPro('f2')}</span>
                 </div>
                 <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{tPro('f3')}</span>
+                  <span className="font-semibold text-white">{tPro('f3')}</span>
                 </div>
                 <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{tPro('f4')}</span>
+                  <span className="font-semibold text-white">{tPro('f4')}</span>
                 </div>
                 <div className="flex items-start gap-3 text-xs sm:text-sm text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{tPro('f5')}</span>
+                  <span className="font-semibold text-white">{tPro('f5')}</span>
                 </div>
                 <div className="flex items-start gap-3 text-xs sm:text-sm text-amber-300">
                   <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="font-semibold">Telegram Bot 24/7 VIP Signallar &amp; Raqobatchilar Spy</span>
+                  <span className="font-semibold text-amber-300">{tPro('f6')}</span>
                 </div>
               </div>
 

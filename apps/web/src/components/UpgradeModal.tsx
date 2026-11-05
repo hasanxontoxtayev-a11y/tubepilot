@@ -233,6 +233,10 @@ export function UpgradeModal({
                   <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{t('starter.f4')}</span>
                 </div>
+                <div className="flex items-start gap-2.5 text-xs text-gray-300">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{t('starter.f5')}</span>
+                </div>
               </div>
             </div>
 
@@ -300,23 +304,23 @@ export function UpgradeModal({
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{t('pro.f2')}</span>
+                  <span className="font-semibold text-white">{t('pro.f2')}</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{t('pro.f3')}</span>
+                  <span className="font-semibold text-white">{t('pro.f3')}</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{t('pro.f4')}</span>
+                  <span className="font-semibold text-white">{t('pro.f4')}</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-200">
                   <Check className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span>{t('pro.f5')}</span>
+                  <span className="font-semibold text-white">{t('pro.f5')}</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-gray-200">
+                <div className="flex items-start gap-2 text-xs text-amber-300">
                   <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="text-amber-300 font-semibold">Telegram Bot VIP signallar &amp; Raqobatchilar Spy</span>
+                  <span className="font-semibold text-amber-300">{t('pro.f6')}</span>
                 </div>
               </div>
 
