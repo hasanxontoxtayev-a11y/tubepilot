@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { TelegramHelpButton } from './TelegramHelpButton';
 import {
@@ -37,6 +38,8 @@ export function ThumbnailStudio({
   onUpgradeClick,
 }: ThumbnailStudioProps = {}) {
   const t = useTranslations('thumbnails');
+  const params = useParams();
+  const currentLocale = (params?.locale as string) || 'uz';
   const isFree = subscriptionTier === 'FREE';
   const [evaluatedCount, setEvaluatedCount] = useState(0);
   const FREE_UPLOAD_LIMIT = 1;
@@ -49,14 +52,34 @@ export function ThumbnailStudio({
   const [evaluation, setEvaluation] = useState<EvaluationData | null>({
     predictedCtrScore: 86,
     contrastRating: 'EXCELLENT',
-    contrastFeedback: 'High subject luminance separation. The creator\'s facial expression isolates crisply from dark ambient studio background.',
+    contrastFeedback: currentLocale === 'ru' 
+      ? 'Отличный контраст объекта и фона. Выражение лица четко выделяется на темном фоне.'
+      : currentLocale === 'en'
+      ? 'High subject luminance separation. The creator\'s facial expression isolates crisply from dark ambient studio background.'
+      : 'Yuqori obyekt va fon kontrasti. Muallif yuz ifodasi qorong\'i studiya fonidan yaqqol ajralib turadi.',
     readabilityRating: 'AVERAGE',
-    readabilityFeedback: 'Primary typography is punchy, but bottom-right elements risk collision with the YouTube 00:00 duration badge.',
-    actionableFixes: [
-      'Shift main keyword typography to top-left to avoid the 14:28 timestamp badge overlay.',
-      'Increase foreground subject facial exposure by +12% for maximum scroll-stopping power on mobile feeds.',
-      'Keep thumbnail text under 4 words for instantaneous 0.4s comprehension.',
-    ],
+    readabilityFeedback: currentLocale === 'ru'
+      ? 'Шрифт яркий, но элементы в правом нижнем углу могут перекрываться значком длительности видео YouTube.'
+      : currentLocale === 'en'
+      ? 'Primary typography is punchy, but bottom-right elements risk collision with the YouTube 00:00 duration badge.'
+      : 'Asosiy matn yorqin, lekin pastki o\'ng burchakdagi elementlar YouTube video vaqti bilan to\'qnashishi mumkin.',
+    actionableFixes: currentLocale === 'ru'
+      ? [
+          'Сдвиньте главный текст в левый верхний угол, чтобы избежать перекрытия таймкодом.',
+          'Увеличьте экспозицию лица объекта на +12% для максимального привлечения внимания в ленте.',
+          'Ограничьте текст обложки максимум 3-4 словами для моментального восприятия за 0.4 сек.'
+        ]
+      : currentLocale === 'en'
+      ? [
+          'Shift main keyword typography to top-left to avoid the 14:28 timestamp badge overlay.',
+          'Increase foreground subject facial exposure by +12% for maximum scroll-stopping power on mobile feeds.',
+          'Keep thumbnail text under 4 words for instantaneous 0.4s comprehension.',
+        ]
+      : [
+          'Asosiy kalit so\'zni yuqori chap burchakka suring (YouTube vaqt belgisi to\'sib qo\'ymasligi uchun).',
+          'Mobil tasmada e\'tiborni tortish uchun qahramon yuziga +12% ko\'proq yorug\'lik bering.',
+          '0.4 soniyada tez ilg\'ab olinishi uchun muqovadagi matnni 3-4 ta so\'zdan oshirmang.'
+        ],
   });
 
   const presetThumbnails = [

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { TelegramHelpButton } from './TelegramHelpButton';
 import {
@@ -35,10 +36,22 @@ interface CommentInboxProps {
 
 export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connectedChannelHandle = '@kanal' }: CommentInboxProps) {
   const t = useTranslations('copilot');
+  const params = useParams();
+  const currentLocale = (params?.locale as string) || 'uz';
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [filterMode, setFilterMode] = useState<'ALL' | 'UNANSWERED' | 'APPROVED'>('ALL');
+
+  const getDefaultDraftReply = (author: string) => {
+    if (currentLocale === 'ru') {
+      return `Здравствуйте, ${author}! Большое спасибо за ваш отзыв и интерес к каналу! 🚀`;
+    }
+    if (currentLocale === 'en') {
+      return `Hello ${author}! Thank you so much for your feedback and support! 🚀`;
+    }
+    return `Assalomu alaykum ${author}! Fikringiz va e'tiboringiz uchun kattakon rahmat! 🚀`;
+  };
 
   const syncChannelComments = async () => {
     setIsSyncing(true);
@@ -51,8 +64,8 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
             id: c.id,
             authorDisplayName: c.authorDisplayName,
             originalText: c.originalText,
-            detectedLanguage: c.detectedLanguage || 'Uzbek',
-            aiDraftReply: `Assalomu alaykum ${c.authorDisplayName}! Fikringiz va e'tiboringiz uchun kattakon rahmat! 🚀`,
+            detectedLanguage: c.detectedLanguage || (currentLocale === 'ru' ? 'Russian' : currentLocale === 'en' ? 'English' : 'Uzbek'),
+            aiDraftReply: getDefaultDraftReply(c.authorDisplayName),
             videoTitle: c.videoTitle,
           }));
           setComments(mapped);

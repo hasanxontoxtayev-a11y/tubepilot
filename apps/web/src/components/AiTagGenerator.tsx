@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import {
   Sparkles,
   Copy,
@@ -30,6 +31,8 @@ export function AiTagGenerator({
   subscriptionTier = 'FREE',
   onUpgradeClick,
 }: AiTagGeneratorProps) {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'uz';
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -37,13 +40,28 @@ export function AiTagGenerator({
   const isFree = subscriptionTier === 'FREE';
   const FREE_LIMIT = 2;
 
+  const t = {
+    title: locale === 'ru' ? 'ИИ SEO и Генератор Тегов' : locale === 'en' ? 'AI SEO & Tag Generator' : 'AI SEO & Teglar Generatori',
+    desc: locale === 'ru' ? 'Введите тему видео — искусственный интеллект найдет самые популярные поисковые запросы.' : locale === 'en' ? 'Enter your video topic — AI will find the highest ranking viral search keywords.' : 'Videongiz mavzusini yozing — sun\'iy intellekt eng yuqori qidiriladigan kalit so\'zlarni topadi.',
+    placeholder: locale === 'ru' ? 'Введите тему видео (например: Обзор нового смартфона, Уроки YouTube SEO)...' : locale === 'en' ? 'Enter video topic (e.g. New phone review, YouTube SEO tips)...' : 'Video mavzusini kiriting (masalan: Yangi telefon sharhi, YouTube SEO darslari)...',
+    generate: locale === 'ru' ? 'Генерация' : locale === 'en' ? 'Generate' : 'Generatsiya',
+    copyAll: locale === 'ru' ? 'Копировать всё' : locale === 'en' ? 'Copy All' : 'Barchasini nusxalash',
+    copied: locale === 'ru' ? 'Скопировано!' : locale === 'en' ? 'Copied!' : 'Nusxalandi!',
+    freeBadge: locale === 'ru' ? 'бесплатно' : locale === 'en' ? 'free' : 'bepul',
+    competition: {
+      LOW: locale === 'ru' ? 'Конкуренция: НИЗКАЯ' : locale === 'en' ? 'Competition: LOW' : 'Raqobat: LOW',
+      MEDIUM: locale === 'ru' ? 'Конкуренция: СРЕДНЯЯ' : locale === 'en' ? 'Competition: MEDIUM' : 'Raqobat: MEDIUM',
+      HIGH: locale === 'ru' ? 'Конкуренция: ВЫСОКАЯ' : locale === 'en' ? 'Competition: HIGH' : 'Raqobat: HIGH',
+    }
+  };
+
   const [tags, setTags] = useState<TagItem[]>([
-    { tag: 'youtube growth 2026', score: 94, competition: 'LOW', volume: '142K/oy' },
-    { tag: 'how to get more views', score: 88, competition: 'MEDIUM', volume: '310K/oy' },
-    { tag: 'youtube algorithm secrets', score: 92, competition: 'LOW', volume: '95K/oy' },
-    { tag: 'youtube tags generator', score: 85, competition: 'LOW', volume: '48K/oy' },
-    { tag: 'youtube seo tutorial', score: 89, competition: 'MEDIUM', volume: '180K/oy' },
-    { tag: 'viral video tips', score: 81, competition: 'HIGH', volume: '520K/oy' },
+    { tag: 'youtube growth 2026', score: 94, competition: 'LOW', volume: locale === 'ru' ? '142 тыс/мес' : '142K/oy' },
+    { tag: 'how to get more views', score: 88, competition: 'MEDIUM', volume: locale === 'ru' ? '310 тыс/мес' : '310K/oy' },
+    { tag: 'youtube algorithm secrets', score: 92, competition: 'LOW', volume: locale === 'ru' ? '95 тыс/мес' : '95K/oy' },
+    { tag: 'youtube tags generator', score: 85, competition: 'LOW', volume: locale === 'ru' ? '48 тыс/мес' : '48K/oy' },
+    { tag: 'youtube seo tutorial', score: 89, competition: 'MEDIUM', volume: locale === 'ru' ? '180 тыс/мес' : '180K/oy' },
+    { tag: 'viral video tips', score: 81, competition: 'HIGH', volume: locale === 'ru' ? '520 тыс/мес' : '520K/oy' },
   ]);
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -113,20 +131,20 @@ export function AiTagGenerator({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                AI SEO &amp; Teglar Generatori
+                {t.title}
               </h3>
               <span className="px-2.5 py-0.5 rounded-full bg-malla-500/20 border border-malla-400/40 text-malla-300 font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-sm">
                 <Sparkles className="w-3 h-3 text-malla-400" />
                 Gemini Pro
               </span>
               {isFree && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-750 text-gray-300 border border-dark-650">
-                  {searchCount}/{FREE_LIMIT} bepul
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-750 text-gray-300 border border-dark-655">
+                  {searchCount}/{FREE_LIMIT} {t.freeBadge}
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              Videongiz mavzusini yozing — sun&apos;iy intellekt eng yuqori qidiriladigan kalit so&apos;zlarni topadi.
+              {t.desc}
             </p>
           </div>
         </div>
@@ -138,12 +156,12 @@ export function AiTagGenerator({
           {copied ? (
             <>
               <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-400">Nusxalandi!</span>
+              <span className="text-emerald-400">{t.copied}</span>
             </>
           ) : (
             <>
               <Copy className="w-4 h-4 text-malla-400" />
-              <span>Barchasini nusxalash</span>
+              <span>{t.copyAll}</span>
             </>
           )}
         </button>
@@ -158,7 +176,7 @@ export function AiTagGenerator({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Video mavzusini kiriting (masalan: Yangi telefon sharhi, YouTube SEO darslari)..."
+              placeholder={t.placeholder}
               className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-dark-900 border border-slate-700/80 text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-malla-400 transition-colors shadow-inner"
             />
           </div>
@@ -168,7 +186,7 @@ export function AiTagGenerator({
             className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-malla-600 via-amber-600 to-malla-500 hover:from-malla-500 hover:to-amber-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-malla-950/60 transition-all flex items-center gap-2 disabled:opacity-50 flex-shrink-0 hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-white" />}
-            <span>Generatsiya</span>
+            <span>{t.generate}</span>
           </button>
         </div>
       </form>
@@ -201,7 +219,7 @@ export function AiTagGenerator({
                       : 'text-amber-400 bg-amber-500/10'
                   }`}
                 >
-                  Raqobat: {item.competition}
+                  {t.competition[item.competition]}
                 </span>
               </div>
             </div>

@@ -186,10 +186,14 @@ export function ChannelAudit({
             </button>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
-            YouTube Channel Audit <span className="text-gradient-malla">&amp; Diagnostic</span>
+            {currentLocale === 'ru' ? 'Аудит и диагностика канала' : currentLocale === 'en' ? 'YouTube Channel Audit & Diagnostic' : 'YouTube Channel Audit & Diagnostic'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
-            Real vaqt tahlili: VPH tezligi, kutilayotgan daromad (RPM), video SEO holati va muqova (thumbnail) jozibadorligi.
+            {currentLocale === 'ru' 
+              ? 'Анализ в реальном времени: скорость VPH, прогноз дохода (RPM), состояние SEO и кликабельность обложек.'
+              : currentLocale === 'en'
+              ? 'Real-time intelligence: VPH browse velocity, projected RPM revenue, video SEO health, and thumbnail CTR.'
+              : 'Real vaqt tahlili: VPH tezligi, kutilayotgan daromad (RPM), video SEO holati va muqova (thumbnail) jozibadorligi.'}
           </p>
         </div>
 
@@ -201,7 +205,7 @@ export function ChannelAudit({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Istalgan YouTube kanalini qidiring (masalan: Subyektiv, Kun.uz, @MKBHD)..."
+              placeholder={currentLocale === 'ru' ? 'Ищите любой YouTube канал (например: Kun.uz, Subyektiv, @MKBHD)...' : currentLocale === 'en' ? 'Search any YouTube channel (e.g. @MrBeast, @MKBHD)...' : 'Istalgan YouTube kanalini qidiring (masalan: Subyektiv, Kun.uz, @MKBHD)...'}
               className="w-full pl-11 pr-28 py-3 rounded-2xl bg-dark-900 border border-slate-700/80 text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-malla-400 transition-colors shadow-inner"
             />
             <button
@@ -216,7 +220,9 @@ export function ChannelAudit({
 
           {/* Quick preset chips */}
           <div className="flex items-center gap-2 mt-2.5 overflow-x-auto pb-1 text-xs">
-            <span className="text-slate-400 text-[11px] font-bold">Misollar:</span>
+            <span className="text-slate-400 text-[11px] font-bold">
+              {currentLocale === 'ru' ? 'Примеры:' : currentLocale === 'en' ? 'Examples:' : 'Misollar:'}
+            </span>
             {['@kunuz_official', 'Subyektiv', 'Daryo', '@MKBHD', '@MrBeast'].map((preset) => (
               <button
                 key={preset}
@@ -468,7 +474,9 @@ export function ChannelAudit({
                           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold transition-all shadow-md shadow-rose-900/30"
                         >
                           <Zap className="w-3.5 h-3.5" />
-                          <span>Connect As Workspace Channel</span>
+                          <span>
+                            {currentLocale === 'ru' ? 'Подключить как рабочий канал' : currentLocale === 'en' ? 'Connect As Workspace Channel' : 'Kanal sifatida ulash'}
+                          </span>
                         </button>
                       )}
                     </div>
