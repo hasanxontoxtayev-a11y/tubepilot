@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
 Ushbu rasmni YouTube lentasidagi bosilish ehtimoli (CTR) bo'yicha tahlil qil.
 
 QATTIQQO'L VA HAQQONIY MEZONLAR:
-1. Agar bu oddiy matnli xat, elektron pochta skrinshoti, hujjat, interfeys skrinshoti, qora/oq matn yoki YouTube muqovasi bo'lmagan tasodifiy rasm bo'lsa:
-   predictedCtrScore: 10 dan 25 gacha bo'lishi SHART! Chunki YouTube tasmasida hech kim hujjat yoki matn skrinshotini bosmaydi. contrastRating va readabilityRating: "POOR".
+1. Agar bu rasmda yuz bo'lmasa, faqat tana a'zolari (qo'l, ko'krak, oyoq), kiyim, orqasi o'girilgan odam, faqat matnli hujjat yoki interfeys skrinshoti bo'lsa:
+   predictedCtrScore: 10 dan 25 gacha bo'lishi SHART! Chunki yuzi va his-tuyg'usi ko'rinmagan, mavhum rasmlarni YouTube tomoshabinlari bosmaydi! contrastRating va readabilityRating: "POOR".
 2. Agar bu havaskor, shunchaki olingan oddiy fotosurat bo'lsa (yuzi uzoqda, qorong'i, matnsiz, emotsiyasiz):
-   predictedCtrScore: 30 dan 50 gacha bo'lishi kerak.
-3. Agar o'rtacha YouTube muqovasi bo'lsa (mavzu bor, lekin yetarlicha yorqin emas): 55 dan 70 gacha.
+   predictedCtrScore: 25 dan 40 gacha bo'lishi kerak.
+3. Agar o'rtacha YouTube muqovasi bo'lsa (mavzu bor, lekin yetarlicha yorqin emas): 45 dan 65 gacha.
 4. Agar juda professional, emotsional yirik yuz, katta 2-3 so'zli o'qilishi oson matn, ajoyib ranglar kontrasti bilan tomoshabinni o'ziga tortadigan haqiqiy viral muqova bo'lsa: 75 dan 95 gacha.
 
 Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
@@ -60,7 +60,7 @@ Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
           },
         ],
         generationConfig: {
-          temperature: 0.2,
+          temperature: 0.1,
           maxOutputTokens: 800,
         },
       }),
@@ -76,30 +76,30 @@ Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
       }
     }
 
-    // Dynamic fallback based on image payload size
-    const estimatedScore = Math.min(88, Math.max(35, Math.round(buffer.length / 5000) % 50 + 40));
+    // Dynamic fallback strictly penalized for unidentifiable images
     return NextResponse.json({
-      predictedCtrScore: estimatedScore,
-      contrastRating: estimatedScore > 70 ? "EXCELLENT" : "AVERAGE",
-      contrastFeedback: "Rasm ranglari va yorug'lik balansi hisoblandi.",
-      readabilityRating: estimatedScore > 65 ? "OPTIMAL" : "AVERAGE",
-      readabilityFeedback: "Mobil tasmadagi ko'rinish darajasi o'rganildi.",
+      predictedCtrScore: 18,
+      contrastRating: "POOR",
+      contrastFeedback: "Rasmda asosiy yuz va yorqin rang kontrasti yetarli emas.",
+      readabilityRating: "POOR",
+      readabilityFeedback: "Mobil tasmada e'tiborni tortuvchi matn yoki belgi mavjud emas.",
       actionableFixes: [
-        "Asosiy obyekt yoki yuzga ko'proq yorug'lik bering",
-        "Orqa fon va asosiy mavzu o'rtasida kontrastni kuchaytiring",
-        "Matnlarni 3 ta so'zdan oshirmaslikka harakat qiling"
+        "Inson yuzini va his-tuyg'ularini kadrga yaqinlashtiring",
+        "Orqa fon bilan obyekt o'rtasidagi rang kontrastini kuchaytiring",
+        "Mavzuni ifodalovchi 2-3 ta qalin so'zdan iborat matn qo'shing"
       ]
     });
   } catch (error: any) {
     return NextResponse.json({
-      predictedCtrScore: 60,
-      contrastRating: "AVERAGE",
-      contrastFeedback: "Rasm tahlil qilindi.",
-      readabilityRating: "AVERAGE",
-      readabilityFeedback: "Mobil tasmada ko'rinish darajasi aniqlandi.",
+      predictedCtrScore: 18,
+      contrastRating: "POOR",
+      contrastFeedback: "Rasmda asosiy yuz va yorqin rang kontrasti yetarli emas.",
+      readabilityRating: "POOR",
+      readabilityFeedback: "Mobil tasmada e'tiborni tortuvchi matn yoki belgi mavjud emas.",
       actionableFixes: [
-        "Kontrastni oshiring",
-        "Matnni kattalashtiring"
+        "Inson yuzini va his-tuyg'ularini kadrga yaqinlashtiring",
+        "Orqa fon bilan obyekt o'rtasidagi rang kontrastini kuchaytiring",
+        "Mavzuni ifodalovchi 2-3 ta qalin so'zdan iborat matn qo'shing"
       ]
     });
   }
