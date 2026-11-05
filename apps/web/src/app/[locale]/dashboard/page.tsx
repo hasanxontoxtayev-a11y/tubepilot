@@ -282,25 +282,6 @@ function DashboardContent() {
       }
     }
 
-    // Check for Owner VIP activation parameter or localStorage
-    const vipParam = searchParams?.get('vip');
-    if (vipParam === 'owner_activated' || vipParam === 'tubepilot_creator_owner_2026') {
-      try {
-        localStorage.setItem('tubepilot_owner_pass', 'true');
-        localStorage.setItem('tubepilot_subscription_tier', 'PRO');
-        document.cookie = 'tubepilot_subscription_tier=PRO; path=/; max-age=315360000';
-        document.cookie = 'tubepilot_owner_pass=true; path=/; max-age=315360000';
-      } catch {}
-      setSubscriptionTier('PRO');
-      showNotification('👑 Muallif VIP rejimi faollashtirildi! Barcha PRO imkoniyatlar doimiy bepul.');
-    } else {
-      try {
-        if (localStorage.getItem('tubepilot_owner_pass') === 'true' || localStorage.getItem('tubepilot_subscription_tier') === 'PRO') {
-          setSubscriptionTier('PRO');
-        }
-      } catch {}
-    }
-
     if (searchParams?.get('payment') === 'success') {
       const tierParam = searchParams.get('tier')?.toUpperCase() === 'FREE' ? 'FREE' : 'PRO';
       setSubscriptionTier(tierParam);
