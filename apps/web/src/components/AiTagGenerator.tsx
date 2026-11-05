@@ -11,6 +11,7 @@ import {
   Search,
   Loader2,
   Zap,
+  Lock,
 } from 'lucide-react';
 
 interface TagItem {
@@ -20,10 +21,22 @@ interface TagItem {
   volume: string;
 }
 
-export function AiTagGenerator() {
+interface AiTagGeneratorProps {
+  subscriptionTier?: 'FREE' | 'PRO';
+  onUpgradeClick?: (feature?: string) => void;
+}
+
+export function AiTagGenerator({
+  subscriptionTier = 'FREE',
+  onUpgradeClick,
+}: AiTagGeneratorProps) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [searchCount, setSearchCount] = useState(0);
+  const isFree = subscriptionTier === 'FREE';
+  const FREE_LIMIT = 2;
+
   const [tags, setTags] = useState<TagItem[]>([
     { tag: 'youtube growth 2026', score: 94, competition: 'LOW', volume: '142K/oy' },
     { tag: 'how to get more views', score: 88, competition: 'MEDIUM', volume: '310K/oy' },
@@ -37,7 +50,13 @@ export function AiTagGenerator() {
     e.preventDefault();
     if (!query.trim()) return;
 
+    if (isFree && searchCount >= FREE_LIMIT) {
+      onUpgradeClick?.("Cheksiz AI Viral Tag Generator (Kunlik Bepul Limit Tugadi)");
+      return;
+    }
+
     setLoading(true);
+    setSearchCount((prev) => prev + 1);
     // Dynamic generation simulation or API hook
     setTimeout(() => {
       const q = query.trim().toLowerCase();
@@ -82,6 +101,11 @@ export function AiTagGenerator() {
                 <Sparkles className="w-3 h-3 text-malla-400" />
                 Gemini Pro
               </span>
+              {isFree && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-750 text-gray-300 border border-dark-650">
+                  {searchCount}/{FREE_LIMIT} bepul
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-300 mt-1">
               Videongiz mavzusini yozing — sun&apos;iy intellekt eng yuqori qidiriladigan kalit so&apos;zlarni topadi.

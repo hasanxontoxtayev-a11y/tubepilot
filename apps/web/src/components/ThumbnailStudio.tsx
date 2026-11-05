@@ -15,6 +15,7 @@ import {
   Layers,
   ArrowRight,
   ShieldAlert,
+  Lock,
 } from 'lucide-react';
 
 interface EvaluationData {
@@ -26,8 +27,19 @@ interface EvaluationData {
   actionableFixes: string[];
 }
 
-export function ThumbnailStudio() {
+interface ThumbnailStudioProps {
+  subscriptionTier?: 'FREE' | 'PRO';
+  onUpgradeClick?: (feature?: string) => void;
+}
+
+export function ThumbnailStudio({
+  subscriptionTier = 'FREE',
+  onUpgradeClick,
+}: ThumbnailStudioProps = {}) {
   const t = useTranslations('thumbnails');
+  const isFree = subscriptionTier === 'FREE';
+  const [evaluatedCount, setEvaluatedCount] = useState(0);
+  const FREE_UPLOAD_LIMIT = 1;
   const [imagePreview, setImagePreview] = useState<string | null>(
     'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=720&q=80'
   );
@@ -66,6 +78,12 @@ export function ThumbnailStudio() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (isFree && evaluatedCount >= FREE_UPLOAD_LIMIT) {
+      onUpgradeClick?.("Gemini Vision Muqova CTR Tahlili (Cheksiz Yuklash)");
+      return;
+    }
+
+    setEvaluatedCount((c) => c + 1);
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result as string);
@@ -147,6 +165,12 @@ export function ThumbnailStudio() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
                   Multimodal Gemini Vision
                 </span>
+                {isFree && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-750 text-gray-300 border border-dark-650 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-malla-400" />
+                    {evaluatedCount}/{FREE_UPLOAD_LIMIT} bepul
+                  </span>
+                )}
               </h3>
               <p className="text-[11px] text-gray-400">
                 AI visual saliency, CTR clickability prediction, and attention heatmaps

@@ -2,47 +2,59 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const subscription = {
-      tier: 'PRO',
-      status: 'ACTIVE',
-      planPrice: 19,
-      currentPeriodEnd: null,
-    };
+    // Determine active user and subscription
+    let subscriptionTier: 'FREE' | 'PRO' = 'FREE';
+    let subscriptionStatus = 'INACTIVE';
+    let planPrice = 0;
+    let currentPeriodEnd = null;
 
-    // 1. First priority on serverless: read channel from cookie
-    const channelCookie = req.cookies.get('tubepilot_connected_channel')?.value;
-    if (channelCookie) {
-      try {
-        const parsed = JSON.parse(channelCookie);
-        if (parsed && parsed.title) {
-          return NextResponse.json({
-            success: true,
-            channel: {
-              id: parsed.handle || 'UC_custom',
-              title: parsed.title,
-              handle: parsed.handle || '@channel',
-              avatar: parsed.avatar || null,
-              subscribers: parsed.subscribers || '0',
-              views: parsed.views || '0',
-              videoCount: parsed.videoCount || 0,
-              isPaired: true,
-            },
-            subscription,
-          });
-        }
-      } catch {}
+    // Check user subscription cookie first (reliable on serverless)
+    const subCookie = req.cookies.get('tubepilot_subscription_tier')?.value;
+    if (subCookie === 'PRO') {
+      subscriptionTier = 'PRO';
+      subscriptionStatus = 'ACTIVE';
+      planPrice = 19;
     }
 
-    // 2. Safe database read if database exists
+    // Safe database read if available
     let ch = null;
+    let user = null;
     try {
       const { prisma } = await import('@kanal/db');
-      ch = await prisma.youTubeChannel.findFirst({
-        orderBy: { updatedAt: 'desc' },
-      });
+      const userId = req.cookies.get('kanal_user_id')?.value;
+      if (userId) {
+        user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { channel: true },
+        });
+        if (user) {
+          if (user.subscriptionTier === 'PRO') {
+            subscriptionTier = 'PRO';
+            subscriptionStatus = user.subscriptionStatus || 'ACTIVE';
+            planPrice = user.planPrice || 19;
+            currentPeriodEnd = user.currentPeriodEnd;
+          }
+          if (user.channel) {
+            ch = user.channel;
+          }
+        }
+      }
+
+      if (!ch) {
+        ch = await prisma.youTubeChannel.findFirst({
+          orderBy: { updatedAt: 'desc' },
+        });
+      }
     } catch (dbErr) {
       // Serverless without SQLite file - expected, gracefully fallback
     }
+
+    const subscription = {
+      tier: subscriptionTier,
+      status: subscriptionStatus,
+      planPrice,
+      currentPeriodEnd,
+    };
 
     if (ch) {
       const subCount = Number(ch.subscriberCount || 0);
@@ -88,7 +100,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       channel: null,
-      subscription: { tier: 'PRO', status: 'ACTIVE' },
+      subscription: { tier: 'FREE', status: 'INACTIVE', planPrice: 0 },
     });
   }
 }

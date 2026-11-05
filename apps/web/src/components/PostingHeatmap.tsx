@@ -2,15 +2,21 @@
 
 import { useMemo } from 'react';
 import { TelegramHelpButton } from './TelegramHelpButton';
-import { Clock } from 'lucide-react';
+import { Clock, Lock, Sparkles } from 'lucide-react';
 
 interface PostingHeatmapProps {
   heatmapMatrix?: number[][]; // 7 days (Mon-Sun) x 24 hours (0-23)
+  subscriptionTier?: 'FREE' | 'PRO';
+  onUpgradeClick?: (feature?: string) => void;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export function PostingHeatmap({ heatmapMatrix }: PostingHeatmapProps) {
+export function PostingHeatmap({
+  heatmapMatrix,
+  subscriptionTier = 'FREE',
+  onUpgradeClick,
+}: PostingHeatmapProps) {
   // Realistic deterministic activity distribution to prevent SSR hydration mismatches
   const matrix = useMemo(() => {
     if (heatmapMatrix && heatmapMatrix.length === 7) return heatmapMatrix;
@@ -33,12 +39,19 @@ export function PostingHeatmap({ heatmapMatrix }: PostingHeatmapProps) {
     return 'bg-dark-700/60 text-gray-600';
   };
 
+  const isFree = subscriptionTier === 'FREE';
+
   return (
-    <div className="p-6 rounded-2xl bg-dark-800 border border-dark-600">
+    <div className="p-6 rounded-3xl bg-dark-850/90 border border-dark-700 relative overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <Clock className="w-5 h-5 text-rose-500" />
           <h3 className="text-base font-semibold text-white">Audience Peak Posting Heatmap</h3>
+          {isFree && (
+            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-malla-500/20 text-malla-300 border border-malla-400/30 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> PRO Feature
+            </span>
+          )}
         </div>
         <TelegramHelpButton featureKey="posting_time" />
       </div>
@@ -46,34 +59,58 @@ export function PostingHeatmap({ heatmapMatrix }: PostingHeatmapProps) {
         Analyzed from your channel's 28-day viewer traffic velocity. High-density blocks indicate optimal release windows.
       </p>
 
-      {/* 24h Time Labels */}
-      <div className="overflow-x-auto pb-2">
-        <div className="min-w-[640px]">
-          <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 text-[10px] text-gray-500 text-center">
-            <span />
-            {Array.from({ length: 24 }, (_, i) => (
-              <span key={i}>{i % 3 === 0 ? `${i}h` : ''}</span>
-            ))}
-          </div>
-
-          {/* Matrix Rows */}
-          {DAYS.map((day, dayIdx) => (
-            <div key={day} className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 items-center">
-              <span className="text-xs text-gray-400 font-medium">{day}</span>
-              {matrix[dayIdx].map((val, hourIdx) => (
-                <div
-                  key={hourIdx}
-                  title={`${day} @ ${hourIdx}:00 - Activity: ${val}%`}
-                  className={`h-6 rounded flex items-center justify-center text-[10px] font-semibold transition-transform hover:scale-110 cursor-pointer ${getColorClass(
-                    val
-                  )}`}
-                >
-                  {val > 80 ? '🔥' : ''}
-                </div>
+      {/* Relative container for heatmap + Free overlay */}
+      <div className="relative">
+        {/* 24h Time Labels & Heatmap Grid */}
+        <div className={`overflow-x-auto pb-2 transition-all ${isFree ? 'blur-sm select-none pointer-events-none opacity-40' : ''}`}>
+          <div className="min-w-[640px]">
+            <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 text-[10px] text-gray-500 text-center">
+              <span />
+              {Array.from({ length: 24 }, (_, i) => (
+                <span key={i}>{i % 3 === 0 ? `${i}h` : ''}</span>
               ))}
             </div>
-          ))}
+
+            {/* Matrix Rows */}
+            {DAYS.map((day, dayIdx) => (
+              <div key={day} className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 items-center">
+                <span className="text-xs text-gray-400 font-medium">{day}</span>
+                {matrix[dayIdx].map((val, hourIdx) => (
+                  <div
+                    key={hourIdx}
+                    title={`${day} @ ${hourIdx}:00 - Activity: ${val}%`}
+                    className={`h-6 rounded flex items-center justify-center text-[10px] font-semibold transition-transform hover:scale-110 cursor-pointer ${getColorClass(
+                      val
+                    )}`}
+                  >
+                    {val > 80 ? '🔥' : ''}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Free Overlay Gate */}
+        {isFree && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-dark-950/70 backdrop-blur-[2px] rounded-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-600 flex items-center justify-center text-white mb-3 shadow-lg shadow-rose-950/50">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h4 className="text-base font-extrabold text-white">Video Yuklash Uchun Eng Optimal Vaqt Xaritasi</h4>
+            <p className="text-xs text-gray-400 max-w-md mt-1 mb-4">
+              Auditoriyangiz eng faol bo&apos;lgan soatlarni ko&apos;rish va dastlabki 2 soatda maksimal tomosha yig&apos;ish uchun PRO tarifiga o&apos;ting.
+            </p>
+            <button
+              type="button"
+              onClick={() => onUpgradeClick?.("Audience Peak Posting Heatmap (Eng Optimal Vaqt)")}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-malla-600 to-amber-600 hover:from-malla-500 hover:to-amber-500 text-white font-extrabold text-xs shadow-xl shadow-malla-950/50 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>PRO Tarifga O&apos;tish ($19)</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-dark-700 mt-2">

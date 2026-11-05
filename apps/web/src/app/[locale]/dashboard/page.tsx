@@ -675,7 +675,13 @@ function DashboardContent() {
         />
 
         {/* AI SEO & Viral Tag Generator Section */}
-        <AiTagGenerator />
+        <AiTagGenerator
+          subscriptionTier={subscriptionTier}
+          onUpgradeClick={(feat) => {
+            setUpgradeFeature(feat);
+            setShowUpgradeModal(true);
+          }}
+        />
 
         {/* TubePilot Channel Audit & Growth Diagnostic */}
         <ChannelAudit
@@ -695,11 +701,23 @@ function DashboardContent() {
             connectedChannelTitle={channel?.title || 'Personal Studio'}
             connectedChannelHandle={channel?.handle || '@channel'}
           />
-          <ThumbnailStudio />
+          <ThumbnailStudio
+            subscriptionTier={subscriptionTier}
+            onUpgradeClick={(feat) => {
+              setUpgradeFeature(feat);
+              setShowUpgradeModal(true);
+            }}
+          />
         </div>
 
         {/* Best Posting Time Heatmap Section */}
-        <PostingHeatmap />
+        <PostingHeatmap
+          subscriptionTier={subscriptionTier}
+          onUpgradeClick={(feat) => {
+            setUpgradeFeature(feat);
+            setShowUpgradeModal(true);
+          }}
+        />
 
         {/* Global Verification Footer */}
         <footer className="mt-16 pt-8 pb-12 border-t border-dark-750 text-center text-xs text-gray-500 space-y-3">

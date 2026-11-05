@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
             email: 'creator@tubepilot.ai',
             name: title,
             avatarUrl: avatar || null,
-            subscriptionTier: 'PRO',
-            subscriptionStatus: 'ACTIVE',
+            subscriptionTier: 'FREE',
+            subscriptionStatus: 'INACTIVE',
           },
           include: { channel: true },
         });
