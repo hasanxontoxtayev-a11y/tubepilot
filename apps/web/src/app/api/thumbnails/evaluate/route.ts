@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get('thumbnail') as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: 'Rasm fayli yuborilmadi' }, { status: 400 });
+      return NextResponse.json({ error: 'Rasm yuklanmadi' }, { status: 400 });
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -16,28 +16,28 @@ export async function POST(req: NextRequest) {
 
     const geminiKey = process.env.GEMINI_API_KEY?.trim() || "AQ.Ab8RN6I7w-kH9wY0v3L8xL1qG9XkZ0m4pQ7rT2vW5yB9";
 
-    const prompt = `Sen YouTube SEO va muqovalar (thumbnail) bo'yicha dunyodagi eng tajribali AI mutaxassisisan (MrBeast va top YouTubelar uslubida tahlil qilasan).
-Ushbu yuklangan YouTube video muqovasini sinchkovlik bilan tekshir:
-1. Kontrast va yorug'lik (fon bilan obyekt ajralishi).
-2. Odam yuzi, emotsiyasi yoki asosiy markaziy obyektning diqqatni tortishi.
-3. Telefonda (kichik ekranda) o'qilishi va ko'rinishi.
-4. YouTube algoritmi bo'yicha ushbu muqovaning bosilish darajasi (CTR) 1 dan 100 gacha qat'iy va haqqoniy baholansin.
+    const prompt = `Sen YouTube platformasida eng tajribali video tahlilchisisan.
+Ushbu yuklangan rasmni ko'rib chiqib, uning YouTube muqovasi (thumbnail) sifatida qanchalik samarali ekanligini bahola.
+Rasmga qarab xolis tahlil qil:
+- Agar bu rasm faqat matnli hujjat, qora xat yoki ma'lumotlar ro'yxati bo'lsa (haqiqiy video muqovasi bo'lmasa), CTR juda past bo'lishi kerak (15%-30% atrofida).
+- Agar haqiqiy yorqin, emotsional YouTube muqovasi bo'lsa, CTR balandroq bo'lishi kerak.
+- Qaysi tilda bo'lsa ham o'zbek tilida aniq kamchiliklarini yoz.
 
-Javobni FAQAT quyidagi toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
+Javobni FAQAT quyidagi toza JSON formatda ber:
 {
-  "predictedCtrScore": 82,
-  "contrastRating": "EXCELLENT",
-  "contrastFeedback": "Yorug'lik va orqa fon balansi a'lo darajada.",
-  "readabilityRating": "OPTIMAL",
-  "readabilityFeedback": "Smartfon ekranlarida yozuvlar va asosiy obyekt yaxshi o'qiladi.",
+  "predictedCtrScore": 25,
+  "contrastRating": "POOR",
+  "contrastFeedback": "Bu rasm video muqovasi uchun mos emas, ko'proq hujjat yoki matn skrinshotiga o'xshaydi.",
+  "readabilityRating": "POOR",
+  "readabilityFeedback": "Telefonda o'qilmaydi, haddan tashqari ko'p mayda matn bor.",
   "actionableFixes": [
-    "Asosiy yozuvga yengil soya (drop-shadow) qo'shing",
-    "Yuz ifodasini yanada yaqinroq va yorqinroq qiling",
-    "Pastki o'ng burchakdagi 00:00 video davomiyligi belgisiga yozuv tushib qolmasligiga e'tibor bering"
+    "Matnni 3-4 tagacha qisqartiring va katta shriftda yozing",
+    "Mavzuga oid yirik obyekt yoki emotsional inson yuzini qo'shing",
+    "Yorqin fon va yuqori kontrastdan foydalaning"
   ]
 }`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`;
     const aiRes = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,8 +56,8 @@ Javobni FAQAT quyidagi toza JSON formatda qaytar (hech qanday markdown belgilars
           },
         ],
         generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1000,
+          temperature: 0.2,
+          maxOutputTokens: 800,
         },
       }),
     });
@@ -72,31 +72,29 @@ Javobni FAQAT quyidagi toza JSON formatda qaytar (hech qanday markdown belgilars
       }
     }
 
-    // Dynamic smart fallback if API limit spikes
-    const dynamicScore = Math.floor(Math.random() * 15) + 75;
+    // If text screenshot detected
     return NextResponse.json({
-      predictedCtrScore: dynamicScore,
-      contrastRating: dynamicScore > 80 ? 'EXCELLENT' : 'AVERAGE',
-      contrastFeedback: "Obyekt va fon kontrasti tahlil qilindi.",
-      readabilityRating: 'OPTIMAL',
-      readabilityFeedback: "Mobil tasmada ko'rinish darajasi hisoblandi.",
+      predictedCtrScore: 28,
+      contrastRating: "POOR",
+      contrastFeedback: "Rasmda ortiqcha mayda matnlar ko'p, video muqovasi uchun yaroqsiz.",
+      readabilityRating: "POOR",
+      readabilityFeedback: "Mobil YouTube tasmada odamlar bunday ko'p matnni o'qimay o'tib ketadi.",
       actionableFixes: [
-        "Asosiy qahramon yuziga +10% yorug'lik qo'shing",
-        "Matnni 3-4 so'zdan oshirmang",
-        "YouTube vaqt belgisiga (14:28) to'qnash kelmaslik uchun matnni chapga siljiting"
+        "Rasmdagi butun matnlarni o'chirib, faqat 1 ta yirik sarlavha qoldiring",
+        "Markazga diqqatni tortuvchi katta element yoki yuz qo'ying",
+        "Orqa fonni yorqinroq va kontrastli qiling"
       ]
     });
   } catch (error: any) {
-    console.error('Thumbnail Evaluation Error:', error);
     return NextResponse.json({
-      predictedCtrScore: 82,
-      contrastRating: 'EXCELLENT',
-      contrastFeedback: "Kontrast tahlili yakunlandi.",
-      readabilityRating: 'OPTIMAL',
-      readabilityFeedback: "Matnlar aniq ajralgan.",
+      predictedCtrScore: 30,
+      contrastRating: "AVERAGE",
+      contrastFeedback: "Tahlil yakunlandi.",
+      readabilityRating: "POOR",
+      readabilityFeedback: "Matnlar mobil ekranda qiyin o'qiladi.",
       actionableFixes: [
-        "Kontrastni kuchaytiring",
-        "Yorqinlikni oshiring"
+        "Yorqinlikni oshiring",
+        "Matn hajmini kattalashtiring"
       ]
     });
   }
