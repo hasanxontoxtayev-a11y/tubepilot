@@ -404,7 +404,7 @@ export function UpgradeModal({
             <span>Xavfsiz to&apos;lov (Click, Payme, Visa/Mastercard) • Istalgan vaqt bekor qilish imkoniyati</span>
           </div>
           <div className="text-[11px] text-gray-400 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-800">
-            {t('instantDevNotice')}
+            24/7 Avtomatlashtirilgan VIP obuna
           </div>
         </div>
       </div>
