@@ -120,10 +120,32 @@ function DashboardContent() {
 
   // 3. Restore or sync channel state from SQLite DB & URL parameters (Clean initial state)
   useEffect(() => {
+    // Check for Owner VIP activation parameter or localStorage FIRST
+    const vipParam = searchParams?.get('vip');
+    const isOwnerVip =
+      vipParam === 'owner_activated' ||
+      vipParam === 'tubepilot_creator_owner_2026' ||
+      (typeof window !== 'undefined' &&
+        (localStorage.getItem('tubepilot_owner_pass') === 'true' ||
+          localStorage.getItem('tubepilot_subscription_tier') === 'PRO'));
+
+    if (vipParam === 'owner_activated' || vipParam === 'tubepilot_creator_owner_2026') {
+      try {
+        localStorage.setItem('tubepilot_owner_pass', 'true');
+        localStorage.setItem('tubepilot_subscription_tier', 'PRO');
+        document.cookie = 'tubepilot_subscription_tier=PRO; path=/; max-age=315360000';
+        document.cookie = 'tubepilot_owner_pass=true; path=/; max-age=315360000';
+      } catch {}
+      setSubscriptionTier('PRO');
+      showNotification('👑 Muallif VIP rejimi faollashtirildi! Barcha PRO imkoniyatlar doimiy bepul.');
+    } else if (isOwnerVip) {
+      setSubscriptionTier('PRO');
+    }
+
     fetch('/api/channels/current')
       .then((res) => res.json())
       .then((data) => {
-        if (data.subscription?.tier) {
+        if (!isOwnerVip && data.subscription?.tier) {
           setSubscriptionTier(data.subscription.tier === 'FREE' ? 'FREE' : 'PRO');
         }
 
