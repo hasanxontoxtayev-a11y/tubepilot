@@ -403,15 +403,8 @@ export function UpgradeModal({
             <Shield className="w-4 h-4 text-emerald-400" />
             <span>Xavfsiz to&apos;lov (Click, Payme, Visa/Mastercard) • Istalgan vaqt bekor qilish imkoniyati</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleActivateOwnerPass('owner')}
-              className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
-              <span>Sayt Egasi (VIP Bepul Faollashtirish)</span>
-            </button>
+          <div className="text-[11px] text-gray-400 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-800">
+            {t('instantDevNotice')}
           </div>
         </div>
       </div>
