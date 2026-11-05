@@ -52,7 +52,8 @@ export function ChannelAudit({
   subscriptionTier = 'FREE',
   onUpgradeClick,
 }: ChannelAuditProps = {}) {
-  const [query, setQuery] = useState('@MKBHD');
+  const initialHandle = connectedHandle || connectedChannel?.handle || '@vclora-p5n';
+  const [query, setQuery] = useState(initialHandle);
   const [loading, setLoading] = useState(false);
   const [auditData, setAuditData] = useState<any>(null);
   const [showCompetitorSpy, setShowCompetitorSpy] = useState(false);
@@ -73,8 +74,10 @@ export function ChannelAudit({
   };
 
   useEffect(() => {
-    fetchAudit('@MKBHD');
-  }, []);
+    const target = connectedHandle || connectedChannel?.handle || '@vclora-p5n';
+    setQuery(target);
+    fetchAudit(target);
+  }, [connectedHandle, connectedChannel?.handle]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
