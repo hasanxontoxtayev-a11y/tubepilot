@@ -276,7 +276,7 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[720px] overflow-y-auto pr-1">
             {comments.map((comment) => {
               const isApproved = approvedIds.includes(comment.id);
               return (

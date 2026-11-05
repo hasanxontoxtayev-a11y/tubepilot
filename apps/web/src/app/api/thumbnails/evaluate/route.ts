@@ -19,29 +19,25 @@ export async function POST(req: NextRequest) {
     const partB = "zR7apHX262l08kMv2OLSBRAfZxZPaaQ";
     const geminiKey = process.env.GEMINI_API_KEY?.trim() || `${partA}${partB}`;
 
-    const prompt = `Sen YouTube Thumbnail bo'yicha dunyodagi eng tajribali va qat'iy tahlilchisisan (MrBeast darajasidagi talablar bilan).
-Ushbu rasmni YouTube lentasidagi bosilish ehtimoli (CTR) bo'yicha tahlil qil.
-
-QATTIQQO'L VA HAQQONIY MEZONLAR:
-1. Agar bu rasmda yuz bo'lmasa, faqat tana a'zolari (qo'l, ko'krak, oyoq), kiyim, orqasi o'girilgan odam, faqat matnli hujjat yoki interfeys skrinshoti bo'lsa:
-   predictedCtrScore: 10 dan 25 gacha bo'lishi SHART! Chunki yuzi va his-tuyg'usi ko'rinmagan, mavhum rasmlarni YouTube tomoshabinlari bosmaydi! contrastRating va readabilityRating: "POOR".
-2. Agar bu havaskor, shunchaki olingan oddiy fotosurat bo'lsa (yuzi uzoqda, qorong'i, matnsiz, emotsiyasiz):
-   predictedCtrScore: 25 dan 40 gacha bo'lishi kerak.
-3. Agar o'rtacha YouTube muqovasi bo'lsa (mavzu bor, lekin yetarlicha yorqin emas): 45 dan 65 gacha.
-4. Agar juda professional, emotsional yirik yuz, katta 2-3 so'zli o'qilishi oson matn, ajoyib ranglar kontrasti bilan tomoshabinni o'ziga tortadigan haqiqiy viral muqova bo'lsa: 75 dan 95 gacha.
+    const prompt = `Sen YouTube Thumbnail bo'yicha eng tajribali xolis ekspertisan.
+Ushbu yuklangan rasmni YouTube muqovasi (thumbnail) sifatida tahlil qil va uning bosilish ehtimolini (CTR) 1 dan 100 gacha son bilan haqqoniy bahola:
+- Agar rasmda matnli hujjat, elektron pochta skrinshoti, kod yoki faqat inson tanasi/kiyimi bo'lsa (yuzsiz): 12 dan 28 gacha ball ber.
+- Agar rasmda inson to'liq gavdasi yoki oddiy portreti bo'lsa (lekin YouTube uchun maxsus qalin matn yoki grafika bo'lmasa): 48 dan 65 gacha ball ber.
+- Agar YouTube uchun tayyorlangan o'rtacha dizayn bo'lsa: 68 dan 78 gacha ball ber.
+- Agar MrBeast darajasidagi yirik emotsiya, qalin 2-3 so'zli matn va yuqori kontrastli ajoyib viral muqova bo'lsa: 80 dan 96 gacha ball ber.
 
 Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
 {
-  "predictedCtrScore": 15,
-  "contrastRating": "POOR",
-  "contrastFeedback": "O'zbek tilida 1 jumlalik aniq va xolis xulosa",
-  "readabilityRating": "POOR",
+  "predictedCtrScore": 60,
+  "contrastRating": "AVERAGE",
+  "contrastFeedback": "O'zbek tilida 1 jumlalik aniq xulosa",
+  "readabilityRating": "AVERAGE",
   "readabilityFeedback": "Mobil tasmada ko'rinishi haqida o'zbek tilida 1 jumlalik tahlil",
   "actionableFixes": ["1-aniq amaliy maslahat", "2-maslahat", "3-maslahat"]
 }`;
 
-    // Use active gemini-3.5-flash for accurate multimodal vision analysis
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiKey}`;
+    // Use active and stable gemini-3.5-flash-lite (bypasses 503 errors and fast)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiKey}`;
     const aiRes = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

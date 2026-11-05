@@ -718,7 +718,7 @@ function DashboardContent() {
         />
 
         {/* Two-Column Studio Layout */}
-        <div id="comment-copilot-section" className="grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-mt-24">
+        <div id="comment-copilot-section" className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start scroll-mt-24">
           <CommentInbox
             connectedChannelTitle={channel?.title || 'Personal Studio'}
             connectedChannelHandle={channel?.handle || '@channel'}
