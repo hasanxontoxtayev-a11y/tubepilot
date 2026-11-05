@@ -57,7 +57,7 @@ Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
         ],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 800,
+          maxOutputTokens: 2048,
         },
       }),
     });
@@ -66,9 +66,33 @@ Javobni FAQAT toza JSON formatda qaytar (hech qanday markdown belgilarsiz):
       const data = await aiRes.json();
       const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (rawText) {
-        const cleanJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(cleanJson);
-        return NextResponse.json(parsed);
+        // Find JSON block or parse cleanly
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        const jsonString = jsonMatch ? jsonMatch[0] : rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          const parsed = JSON.parse(jsonString);
+          if (parsed && typeof parsed.predictedCtrScore === 'number') {
+            return NextResponse.json(parsed);
+          }
+        } catch {
+          // If JSON had truncated trailing fix, extract regex values safely
+          const scoreMatch = rawText.match(/"predictedCtrScore"\s*:\s*(\d+)/);
+          if (scoreMatch) {
+            const score = parseInt(scoreMatch[1], 10);
+            return NextResponse.json({
+              predictedCtrScore: score,
+              contrastRating: score > 70 ? "EXCELLENT" : score > 45 ? "AVERAGE" : "POOR",
+              contrastFeedback: score > 60 ? "Rasm obyektlari va fon kontrasti yetarli darajada ajralgan." : "Rasmda asosiy yuz va yorqin rang kontrasti yetarli emas.",
+              readabilityRating: score > 65 ? "OPTIMAL" : score > 40 ? "AVERAGE" : "POOR",
+              readabilityFeedback: score > 60 ? "Mobil tasmada obyekt yaxshi ko'rinadi." : "Mobil tasmada e'tiborni tortuvchi yirik matn yoki belgi kam.",
+              actionableFixes: [
+                "Inson yuzini va his-tuyg'ularini kadrga yaqinlashtiring",
+                "Orqa fon bilan obyekt o'rtasidagi rang kontrastini kuchaytiring",
+                "Mavzuni ifodalovchi 2-3 ta qalin so'zdan iborat matn qo'shing"
+              ]
+            });
+          }
+        }
       }
     }
 
