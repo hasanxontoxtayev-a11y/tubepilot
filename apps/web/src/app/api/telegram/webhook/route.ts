@@ -522,6 +522,43 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      // Open Dashboard Direct Link Handler
+      if (text.includes('Boshqaruv Paneli') || text.includes('Панель Управления') || text.includes('Dashboard') || text === '/dashboard') {
+        const dashMsg = {
+          uz:
+            `🌐 **TubePilot AI — Boshqaruv Markazi (Dashboard)**\n\n` +
+            `Kompyuteringiz yoki telefoningizdan to'liq ishchi stolga kirish uchun quyidagi havolani bosing:\n\n` +
+            `👉 [https://www.tubepilotpro.com/${currentLang}/dashboard](https://www.tubepilotpro.com/${currentLang}/dashboard)\n\n` +
+            `⚡ *U yerda: AI teglari, real vaqt auditi, muqova tahlili va barcha video statistikangiz mavjud.*`,
+          ru:
+            `🌐 **TubePilot AI — Панель Управления (Dashboard)**\n\n` +
+            `Для перехода в вашу полную рабочую панель нажмите ссылку ниже:\n\n` +
+            `👉 [https://www.tubepilotpro.com/${currentLang}/dashboard](https://www.tubepilotpro.com/${currentLang}/dashboard)\n\n` +
+            `⚡ *Там доступны: генератор вирусных тегов, аудит в реальном времени, оценка обложек и полная аналитика.*`,
+          en:
+            `🌐 **TubePilot AI — Web Dashboard**\n\n` +
+            `Click the link below to open your full creator workspace:\n\n` +
+            `👉 [https://www.tubepilotpro.com/${currentLang}/dashboard](https://www.tubepilotpro.com/${currentLang}/dashboard)\n\n` +
+            `⚡ *Available tools: AI Tag Generator, Live Channel Audit, Thumbnail CTR evaluation, and deep analytics.*`,
+        }[currentLang];
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: dashMsg,
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: `🚀 ${t.btnDashboard}`, url: `https://www.tubepilotpro.com/${currentLang}/dashboard` }]
+              ]
+            }
+          }),
+        });
+        return NextResponse.json({ ok: true });
+      }
+
       // Default Help & Guidance
       const helpMsg = 
         `🤖 **TubePilot AI (${currentLang.toUpperCase()}):**\n\n` +
