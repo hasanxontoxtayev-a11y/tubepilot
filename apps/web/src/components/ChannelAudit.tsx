@@ -130,8 +130,8 @@ export function ChannelAudit({
   };
 
   useEffect(() => {
-    if (connectedHandle || connectedChannel?.handle) {
-      const target = connectedHandle || connectedChannel?.handle;
+    const target = connectedHandle || connectedChannel?.handle;
+    if (target) {
       setQuery(target);
       fetchAudit(target);
     } else {
