@@ -439,17 +439,6 @@ function DashboardContent() {
             )}
           </button>
 
-          {/* YouTube Extension HUD Button */}
-          <a
-            href="/api/extension/download"
-            download="tubepilot-extension.zip"
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-black rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white transition-all shadow-md shadow-emerald-950/40 active:scale-95 border border-emerald-400/40 cursor-pointer"
-            title="YouTube ichida jonli tahlillarni ko'rsatuvchi TubePilot Chrome Kengaytmasini yuklab olish"
-          >
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            <span>🚀 YouTube HUD (Kengaytma)</span>
-          </a>
-
           <LocaleSwitcher />
         </div>
       </header>
