@@ -1,30 +1,18 @@
-import { prisma } from '@kanal/db';
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const userId = req.cookies.get('kanal_user_id')?.value;
-    let user = userId
-      ? await prisma.user.findUnique({
-          where: { id: userId },
-        })
-      : null;
+    const pairToken = req.cookies.get('tubepilot_tg_pair_token')?.value;
+    const isPaired = req.cookies.get('tubepilot_tg_paired')?.value === 'true';
 
-    if (!user) {
-      user = await prisma.user.findFirst();
-    }
-
-    if (!user) {
-      return NextResponse.json({ paired: false });
-    }
-
-    const isPaired = !!user.telegramChatId || !!user.telegramUserId;
     return NextResponse.json({
       paired: isPaired,
-      telegramUsername: user.telegramUsername || null,
-      language: user.preferredLanguage || 'en',
+      telegramUsername: isPaired ? 'tubepilotai_bot' : null,
+      language: 'uz',
     });
   } catch (error: any) {
-    return NextResponse.json({ paired: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ paired: false });
   }
 }

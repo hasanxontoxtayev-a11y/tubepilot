@@ -55,7 +55,7 @@ export function ChannelAudit({
 }: ChannelAuditProps = {}) {
   const params = useParams();
   const currentLocale = (params?.locale as string) || 'uz';
-  const initialHandle = connectedHandle || connectedChannel?.handle || '@vclora-p5n';
+  const initialHandle = connectedHandle || connectedChannel?.handle || '';
   const [query, setQuery] = useState(initialHandle);
   const [loading, setLoading] = useState(false);
   const [auditData, setAuditData] = useState<any>(null);
@@ -130,9 +130,15 @@ export function ChannelAudit({
   };
 
   useEffect(() => {
-    const target = connectedHandle || connectedChannel?.handle || '@vclora-p5n';
-    setQuery(target);
-    fetchAudit(target);
+    if (connectedHandle || connectedChannel?.handle) {
+      const target = connectedHandle || connectedChannel?.handle;
+      setQuery(target);
+      fetchAudit(target);
+    } else {
+      // If user has not connected any channel, show neutral popular channel or empty
+      setQuery('');
+      setAuditData(null);
+    }
   }, [connectedHandle, connectedChannel?.handle]);
 
   const handleSearch = (e: React.FormEvent) => {

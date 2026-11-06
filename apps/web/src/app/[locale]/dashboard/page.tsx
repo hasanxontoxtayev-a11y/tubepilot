@@ -600,7 +600,7 @@ function DashboardContent() {
                 <h2 className="text-base font-black text-white truncate flex items-center gap-1.5 mt-0.5">
                   <span className="truncate">
                     {isChannelConnected && channel
-                      ? (channel.title && channel.title !== 'Kanal ulanmagan' ? channel.title : (channel.handle ? channel.handle.replace('@', '') : 'VELORA'))
+                      ? (channel.title && channel.title !== 'Kanal ulanmagan' ? channel.title : (channel.handle ? channel.handle.replace('@', '') : 'YouTube Channel'))
                       : tDash('noChannelConnected')}
                   </span>
                   {isChannelConnected && <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
