@@ -142,6 +142,45 @@ function DashboardContent() {
       setSubscriptionTier('PRO');
     }
 
+    if (searchParams?.get('oauth_modal') === 'true') {
+      setShowConnectModal(true);
+    }
+
+    const isGoogleSuccess = searchParams?.get('google_oauth') === 'success';
+    const isConnectedParam = searchParams?.get('connected') === 'true';
+
+    // Prioritize OAuth redirect query params if just returned from Google
+    if (isGoogleSuccess || isConnectedParam) {
+      const chTitle = searchParams?.get('ch_title');
+      const chHandle = searchParams?.get('ch_handle');
+      const chSubs = searchParams?.get('ch_subs');
+      const chViews = searchParams?.get('ch_views');
+      const chAvatar = searchParams?.get('ch_avatar');
+
+      if (chTitle) {
+        const decodedTitle = decodeURIComponent(chTitle);
+        const chState: ChannelState = {
+          title: decodedTitle,
+          subscribers: chSubs ? decodeURIComponent(chSubs) : '0',
+          views: chViews ? decodeURIComponent(chViews) : '0',
+          avatar: chAvatar ? decodeURIComponent(chAvatar) : FALLBACK_AVATAR,
+          handle: chHandle ? decodeURIComponent(chHandle) : '@channel',
+          isPaired: true,
+        };
+        setChannel(chState);
+        setIsChannelConnected(true);
+        try {
+          localStorage.setItem('tubepilot_connected_channel', JSON.stringify(chState));
+        } catch {}
+        showNotification(`YouTube kanal muvaffaqiyatli ulandi: ${decodedTitle}`);
+      }
+
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      return;
+    }
+
     fetch('/api/channels/current')
       .then((res) => res.json())
       .then((data) => {
@@ -220,67 +259,6 @@ function DashboardContent() {
         setIsChannelConnected(false);
         setChannel(null);
       });
-
-    if (searchParams?.get('oauth_modal') === 'true') {
-      setShowConnectModal(true);
-    }
-
-    const isGoogleSuccess = searchParams?.get('google_oauth') === 'success';
-    const isConnectedParam = searchParams?.get('connected') === 'true';
-
-    if (isGoogleSuccess || isConnectedParam) {
-      const chTitle = searchParams?.get('ch_title');
-      const chHandle = searchParams?.get('ch_handle');
-      const chSubs = searchParams?.get('ch_subs');
-      const chViews = searchParams?.get('ch_views');
-      const chAvatar = searchParams?.get('ch_avatar');
-
-      if (chTitle) {
-        const decodedTitle = decodeURIComponent(chTitle);
-        const chState: ChannelState = {
-          title: decodedTitle,
-          subscribers: chSubs ? decodeURIComponent(chSubs) : '0',
-          views: chViews ? decodeURIComponent(chViews) : '0',
-          avatar: chAvatar ? decodeURIComponent(chAvatar) : FALLBACK_AVATAR,
-          handle: chHandle ? decodeURIComponent(chHandle) : '@channel',
-          isPaired: true,
-        };
-        setChannel(chState);
-        setIsChannelConnected(true);
-        try {
-          localStorage.setItem('tubepilot_connected_channel', JSON.stringify(chState));
-        } catch {}
-        showNotification(`YouTube kanal muvaffaqiyatli ulandi: ${decodedTitle}`);
-      } else {
-        fetch('/api/channels/current')
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success && data.channel) {
-              const ch = data.channel;
-              const chState: ChannelState = {
-                title: ch.title,
-                subscribers: ch.subscribers,
-                views: ch.views,
-                avatar: ch.avatar || FALLBACK_AVATAR,
-                handle: ch.handle || '@channel',
-                isPaired: ch.isPaired,
-              };
-              setChannel(chState);
-              setIsChannelConnected(true);
-              try {
-                localStorage.setItem('tubepilot_connected_channel', JSON.stringify(chState));
-              } catch {}
-              showNotification(`YouTube kanal muvaffaqiyatli ulandi: ${ch.title}`);
-            }
-          })
-          .catch(() => {});
-      }
-
-      // Clean up URL searchParams cleanly without triggering full page reloads
-      if (typeof window !== 'undefined' && window.history?.replaceState) {
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    }
 
     if (searchParams?.get('payment') === 'success') {
       const tierParam = searchParams.get('tier')?.toUpperCase() === 'FREE' ? 'FREE' : 'PRO';

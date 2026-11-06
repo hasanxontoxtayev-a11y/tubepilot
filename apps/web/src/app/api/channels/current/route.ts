@@ -17,6 +17,15 @@ export async function GET(req: NextRequest) {
       planPrice = 0;
     }
 
+    // Safe cookie read for channel (100% reliable on Vercel serverless)
+    const channelCookie = req.cookies.get('tubepilot_connected_channel')?.value;
+    let cookieChannel = null;
+    if (channelCookie) {
+      try {
+        cookieChannel = JSON.parse(channelCookie);
+      } catch {}
+    }
+
     // Safe database read if available
     let ch = null;
     let user = null;
@@ -85,6 +94,23 @@ export async function GET(req: NextRequest) {
           subscribers: formattedSubscribers,
           views: formattedViews,
           videoCount: ch.videoCount,
+          isPaired: true,
+        },
+        subscription,
+      });
+    }
+
+    if (cookieChannel && (cookieChannel.title || cookieChannel.handle)) {
+      return NextResponse.json({
+        success: true,
+        channel: {
+          id: cookieChannel.id || 'google_channel',
+          title: cookieChannel.title,
+          handle: cookieChannel.handle || '@channel',
+          avatar: cookieChannel.avatar,
+          subscribers: cookieChannel.subscribers || '0',
+          views: cookieChannel.views || '0',
+          videoCount: cookieChannel.videoCount || 0,
           isPaired: true,
         },
         subscription,
