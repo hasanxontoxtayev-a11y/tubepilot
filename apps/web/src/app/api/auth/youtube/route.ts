@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
         access_type: "offline",
         prompt: "consent",
         scope: scopes,
+        state: locale,
       });
 
       return NextResponse.redirect(authUrl);

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
+  const returnLocale = searchParams.get('state') || 'uz';
 
   if (!code) {
     return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
@@ -124,7 +125,7 @@ export async function GET(req: NextRequest) {
       isPaired: true,
     };
 
-    const targetUrl = new URL('/uz/dashboard?connected=true&google_oauth=success', req.url);
+    const targetUrl = new URL(`/${returnLocale}/dashboard?connected=true&google_oauth=success`, req.url);
     targetUrl.searchParams.set('ch_title', encodeURIComponent(channelData.title));
     targetUrl.searchParams.set('ch_handle', encodeURIComponent(channelData.handle));
     targetUrl.searchParams.set('ch_subs', encodeURIComponent(channelData.subscribers));

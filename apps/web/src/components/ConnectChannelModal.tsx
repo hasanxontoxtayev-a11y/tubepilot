@@ -40,8 +40,10 @@ export function ConnectChannelModal({
   // Direct 1-Click Google OAuth flow
   const handleGoogleSignIn = () => {
     setLoading(true);
-    // Direct redirect straight to /api/auth/youtube
-    window.location.href = '/api/auth/youtube';
+    // Pass current locale so Google redirects back to the user's active language
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/uz';
+    const currentLocale = currentPath.split('/')[1] || 'uz';
+    window.location.href = `/api/auth/youtube?locale=${encodeURIComponent(currentLocale)}`;
   };
 
   return (
