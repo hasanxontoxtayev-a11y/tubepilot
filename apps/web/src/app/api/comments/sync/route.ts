@@ -192,7 +192,8 @@ import { prisma } from '@kanal/db';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const channel = searchParams.get('channel')?.trim() || '@kunuz';
+    const channelParam = searchParams.get('channel') || searchParams.get('handle') || '@Beatnova-g3v';
+    const channel = channelParam.trim();
 
     const comments = await fetchLiveYouTubeComments(channel);
 
@@ -200,7 +201,10 @@ export async function GET(req: NextRequest) {
     if (comments.length > 0) {
       try {
         const user = await prisma.user.findFirst({
-          where: { telegramChatId: { not: null } },
+          where: {
+            telegramChatId: { not: null },
+            channel: { customUrl: { contains: channel.replace('@', '') } }
+          },
           include: { channel: true },
         });
 

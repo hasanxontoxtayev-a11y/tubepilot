@@ -316,7 +316,7 @@ export async function POST(req: NextRequest) {
         // Fetch real comments using the live InnerTube engine
         let commentsList: any[] = [];
         try {
-          const res = await fetch(`https://www.tubepilotpro.com/api/comments/sync?handle=${encodeURIComponent(targetHandle)}`);
+          const res = await fetch(`https://www.tubepilotpro.com/api/comments/sync?channel=${encodeURIComponent(targetHandle.startsWith('@') ? targetHandle : `@${targetHandle}`)}`);
           const data = await res.json();
           if (data.success && Array.isArray(data.comments)) {
             commentsList = data.comments;
