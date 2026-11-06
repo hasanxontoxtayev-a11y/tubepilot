@@ -32,23 +32,31 @@ export async function GET(req: NextRequest) {
 
     // Fetch channel metadata
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
-    const channelRes = await youtube.channels.list({
-      part: ['snippet', 'statistics'],
-      mine: true,
-    });
-
-    const channelItem = channelRes.data.items?.[0];
-    if (!channelItem || !channelItem.id) {
-      return NextResponse.json({ error: 'No YouTube channel found for this account' }, { status: 404 });
+    let channelItem = null;
+    try {
+      const channelRes = await youtube.channels.list({
+        part: ['snippet', 'statistics'],
+        mine: true,
+      });
+      channelItem = channelRes.data.items?.[0] || null;
+    } catch (ytErr) {
+      console.warn('[YouTube API] channels.list error:', ytErr);
     }
 
+    // If Google account has no dedicated YouTube channel yet, use Google user info gracefully
+    const channelTitle = channelItem?.snippet?.title || userInfo.data.name || 'YouTube Creator';
+    const channelHandle = channelItem?.snippet?.customUrl || `@${(userInfo.data.name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
+    const channelAvatar = channelItem?.snippet?.thumbnails?.high?.url || channelItem?.snippet?.thumbnails?.default?.url || userInfo.data.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80';
+    const channelSubs = channelItem?.statistics?.subscriberCount || '0';
+    const channelViews = channelItem?.statistics?.viewCount || '0';
+
     let activeUserId = req.cookies.get('kanal_user_id')?.value;
-    let currentUser = activeUserId ? await prisma.user.findUnique({ where: { id: activeUserId } }) : null;
+    let currentUser = null;
 
     try {
-      const email = userInfo.data.email || `${channelItem.id}@youtube.placeholder`;
+      const email = userInfo.data.email || `${userInfo.data.id || 'user'}@google.placeholder`;
+      currentUser = activeUserId ? await prisma.user.findUnique({ where: { id: activeUserId } }) : null;
       
-      // If user had already clicked telegram pair in this browser, preserve their telegramChatId
       const existingTgChatId = currentUser?.telegramChatId;
       const existingTgUser = currentUser?.telegramUsername;
 
@@ -56,61 +64,63 @@ export async function GET(req: NextRequest) {
         where: { email },
         create: {
           email,
-          name: userInfo.data.name || channelItem.snippet?.title || 'Creator',
-          avatarUrl: userInfo.data.picture || channelItem.snippet?.thumbnails?.default?.url,
+          name: channelTitle,
+          avatarUrl: channelAvatar,
           telegramChatId: existingTgChatId || null,
           telegramUsername: existingTgUser || null,
         },
         update: {
-          name: userInfo.data.name || channelItem.snippet?.title,
-          avatarUrl: userInfo.data.picture || channelItem.snippet?.thumbnails?.default?.url,
+          name: channelTitle,
+          avatarUrl: channelAvatar,
           telegramChatId: existingTgChatId || undefined,
           telegramUsername: existingTgUser || undefined,
         },
       });
       activeUserId = currentUser.id;
 
-      await prisma.youTubeChannel.upsert({
-        where: { id: channelItem.id },
-        create: {
-          id: channelItem.id,
-          userId: activeUserId,
-          title: channelItem.snippet?.title || 'My Channel',
-          description: channelItem.snippet?.description,
-          customUrl: channelItem.snippet?.customUrl || null,
-          thumbnailUrl: channelItem.snippet?.thumbnails?.high?.url || channelItem.snippet?.thumbnails?.default?.url,
-          subscriberCount: BigInt(channelItem.statistics?.subscriberCount || 0),
-          videoCount: Number(channelItem.statistics?.videoCount || 0),
-          viewCount: BigInt(channelItem.statistics?.viewCount || 0),
-          encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : 'token',
-          encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : 'token',
-          tokenExpiresAt: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
-          tokenScope: tokens.scope || '',
-        },
-        update: {
-          userId: activeUserId,
-          title: channelItem.snippet?.title || undefined,
-          customUrl: channelItem.snippet?.customUrl || undefined,
-          thumbnailUrl: channelItem.snippet?.thumbnails?.high?.url || channelItem.snippet?.thumbnails?.default?.url || undefined,
-          subscriberCount: BigInt(channelItem.statistics?.subscriberCount || 0),
-          videoCount: Number(channelItem.statistics?.videoCount || 0),
-          viewCount: BigInt(channelItem.statistics?.viewCount || 0),
-          encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : undefined,
-          encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : undefined,
-          tokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-          tokenScope: tokens.scope || undefined,
-        },
-      });
+      if (channelItem?.id) {
+        await prisma.youTubeChannel.upsert({
+          where: { id: channelItem.id },
+          create: {
+            id: channelItem.id,
+            userId: activeUserId,
+            title: channelTitle,
+            description: channelItem.snippet?.description,
+            customUrl: channelHandle,
+            thumbnailUrl: channelAvatar,
+            subscriberCount: BigInt(channelSubs),
+            videoCount: Number(channelItem.statistics?.videoCount || 0),
+            viewCount: BigInt(channelViews),
+            encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : 'token',
+            encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : 'token',
+            tokenExpiresAt: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
+            tokenScope: tokens.scope || '',
+          },
+          update: {
+            userId: activeUserId,
+            title: channelTitle,
+            customUrl: channelHandle,
+            thumbnailUrl: channelAvatar,
+            subscriberCount: BigInt(channelSubs),
+            videoCount: Number(channelItem.statistics?.videoCount || 0),
+            viewCount: BigInt(channelViews),
+            encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : undefined,
+            encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : undefined,
+            tokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+            tokenScope: tokens.scope || undefined,
+          },
+        });
+      }
     } catch (dbErr) {
       console.warn('[OAuth Callback] Database persistence bypassed for serverless:', dbErr);
     }
 
     const channelData = {
-      title: channelItem.snippet?.title || 'YouTube Channel',
-      handle: channelItem.snippet?.customUrl || '@channel',
-      subscribers: channelItem.statistics?.subscriberCount || '0',
-      views: channelItem.statistics?.viewCount || '0',
-      avatar: channelItem.snippet?.thumbnails?.high?.url || channelItem.snippet?.thumbnails?.default?.url || '',
+      title: channelTitle,
+      handle: channelHandle,
+      subscribers: channelSubs,
+      views: channelViews,
+      avatar: channelAvatar,
       isPaired: true,
     };
 
