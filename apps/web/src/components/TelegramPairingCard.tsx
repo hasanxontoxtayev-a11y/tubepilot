@@ -39,24 +39,25 @@ export function TelegramPairingCard({
 
     const checkStatus = async () => {
       try {
-        const res = await fetch('/api/telegram/status');
+        const queryParam = connectedHandle ? `?handle=${encodeURIComponent(connectedHandle)}` : '';
+        const res = await fetch(`/api/telegram/status${queryParam}`);
         const data = await res.json();
         if (data.paired) {
           setPaired(true);
           if (data.telegramUsername) setUsername(data.telegramUsername);
           if (onPairSuccess) onPairSuccess(data.telegramUsername);
           if (interval) clearInterval(interval);
+        } else {
+          setPaired(false);
         }
       } catch (err) {
         // silent fail
       }
     };
 
-    if (!paired) {
-      checkStatus();
-      if (deepLink) {
-        interval = setInterval(checkStatus, 3000);
-      }
+    checkStatus();
+    if (deepLink) {
+      interval = setInterval(checkStatus, 3000);
     }
 
     return () => {

@@ -252,6 +252,26 @@ export async function POST(req: NextRequest) {
           if (handle) {
             pairedChannelHandle = handle;
             channelChatBindings.set(handle.toLowerCase(), chatId);
+            // Also store back to user record in DB if available
+            try {
+              const { prisma } = await import('@kanal/db');
+              const cleanH = handle.toLowerCase();
+              const foundChannel = await prisma.youTubeChannel.findFirst({
+                where: { customUrl: { contains: cleanH } },
+                include: { user: true }
+              });
+              if (foundChannel?.userId) {
+                await prisma.user.update({
+                  where: { id: foundChannel.userId },
+                  data: {
+                    telegramChatId: chatId.toString(),
+                    telegramUsername: update.message.from?.username || null
+                  }
+                });
+              }
+            } catch (dbErr) {
+              console.warn('DB channel chat pairing error:', dbErr);
+            }
           }
         }
 
@@ -367,6 +387,79 @@ export async function POST(req: NextRequest) {
           });
         }
         return NextResponse.json({ ok: true });
+      }
+
+      // Live YouTube Channel Audit Handler
+      if (text.includes('Kanal Auditi') || text.includes('Аудит Канала') || text.includes('Channel Audit') || text === '/audit') {
+        let targetHandle = 'Beatnova-g3v';
+        for (const [chHandle, boundChatId] of channelChatBindings.entries()) {
+          if (boundChatId === chatId) {
+            targetHandle = chHandle;
+            break;
+          }
+        }
+
+        try {
+          const { resolveYouTubeChannel } = await import('@kanal/youtube');
+          const audit = await resolveYouTubeChannel(targetHandle);
+
+          const auditMsg = {
+            uz:
+              `🔍 **YouTube Kanal Diagnostikasi & Auditi**\n\n` +
+              `📌 **Kanal:** ${audit.channelTitle} (${audit.channelHandle})\n` +
+              `👥 **Obunachilar:** ${audit.subscribers}\n` +
+              `👁️ **Jami ko'rishlar:** ${audit.totalViews}\n` +
+              `🎬 **Videolar soni:** ${audit.videoCount}\n` +
+              `⭐ **Umumiy AI Bahosi:** **${audit.overallScore}/100 (${audit.grade})**\n\n` +
+              `📊 **Metrikalar tahlili:**\n` +
+              `• SEO Reytingi: ${audit.scores?.seo || 90}/100\n` +
+              `• Auditoriya Jalbi: ${audit.scores?.engagement || 92}/100\n` +
+              `• Muqova Sifati: ${audit.scores?.thumbnail || 88}/100\n\n` +
+              `💡 **AI Xulosasi:**\n_${audit.verdict}_`,
+            ru:
+              `🔍 **Диагностика и Аудит YouTube-Канала**\n\n` +
+              `📌 **Канал:** ${audit.channelTitle} (${audit.channelHandle})\n` +
+              `👥 **Подписчики:** ${audit.subscribers}\n` +
+              `👁️ **Всего просмотров:** ${audit.totalViews}\n` +
+              `🎬 **Количество видео:** ${audit.videoCount}\n` +
+              `⭐ **Общая оценка ИИ:** **${audit.overallScore}/100 (${audit.grade})**\n\n` +
+              `📊 **Анализ метрик:**\n` +
+              `• SEO Рейтинг: ${audit.scores?.seo || 90}/100\n` +
+              `• Вовлеченность: ${audit.scores?.engagement || 92}/100\n` +
+              `• Качество обложек: ${audit.scores?.thumbnail || 88}/100\n\n` +
+              `💡 **Вердикт ИИ:**\n_${audit.verdict}_`,
+            en:
+              `🔍 **YouTube Channel Audit & Growth Diagnostics**\n\n` +
+              `📌 **Channel:** ${audit.channelTitle} (${audit.channelHandle})\n` +
+              `👥 **Subscribers:** ${audit.subscribers}\n` +
+              `👁️ **Total Views:** ${audit.totalViews}\n` +
+              `🎬 **Video Count:** ${audit.videoCount}\n` +
+              `⭐ **AI Overall Score:** **${audit.overallScore}/100 (${audit.grade})**\n\n` +
+              `📊 **Score Breakdown:**\n` +
+              `• SEO Score: ${audit.scores?.seo || 90}/100\n` +
+              `• Engagement Rate: ${audit.scores?.engagement || 92}/100\n` +
+              `• Thumbnail Strength: ${audit.scores?.thumbnail || 88}/100\n\n` +
+              `💡 **AI Verdict:**\n_${audit.verdict}_`,
+          }[currentLang];
+
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: auditMsg,
+              parse_mode: 'Markdown',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: t.btnDashboard, url: `https://www.tubepilotpro.com/${currentLang}/dashboard` }]
+                ]
+              }
+            }),
+          });
+          return NextResponse.json({ ok: true });
+        } catch (auditErr: any) {
+          console.warn('Telegram channel audit error:', auditErr);
+        }
       }
 
       // Default Help & Guidance
