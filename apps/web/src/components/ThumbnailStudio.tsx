@@ -300,7 +300,9 @@ export function ThumbnailStudio({
 
         {/* Quick Presets Bar */}
         <div className="flex items-center gap-2 mt-2.5 text-xs">
-          <span className="text-gray-500 text-[11px] font-semibold">Test Presets:</span>
+          <span className="text-gray-500 text-[11px] font-semibold">
+            {currentLocale === 'ru' ? 'Шаблоны:' : currentLocale === 'en' ? 'Presets:' : 'Namunalar:'}
+          </span>
           {presetThumbnails.map((p) => (
             <button
               key={p.title}

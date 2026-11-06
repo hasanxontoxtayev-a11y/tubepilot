@@ -218,10 +218,12 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
             <button
               onClick={() => setNewCommentModal(!newCommentModal)}
               className="p-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-300 hover:text-white border border-dark-600 transition-all text-xs flex items-center gap-1 font-semibold"
-              title="Test custom comment"
+              title={currentLocale === 'ru' ? 'Добавить комментарий' : currentLocale === 'en' ? 'Add comment' : 'Izoh qo\'shish'}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Test Comment</span>
+              <span className="hidden sm:inline">
+                {currentLocale === 'ru' ? 'Новый коммент' : currentLocale === 'en' ? 'New Comment' : 'Yangi Izoh'}
+              </span>
             </button>
             {comments.length > 0 && (
               <button
@@ -239,7 +241,7 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
         {newCommentModal && (
           <form onSubmit={handleAddCustomComment} className="p-4 rounded-2xl bg-dark-900 border border-dark-700 space-y-3 mb-4 animate-fadeIn">
             <div className="flex items-center justify-between text-xs font-bold text-white">
-              <span>Test AI Copilot on ANY Viewer Comment:</span>
+              <span>{currentLocale === 'ru' ? 'AI Копилот для ответа на комментарий:' : currentLocale === 'en' ? 'AI Copilot Reply to Comment:' : 'Izohga AI Javob Yaratish:'}</span>
               <button type="button" onClick={() => setNewCommentModal(false)} className="text-gray-500 hover:text-white">
                 <X className="w-3.5 h-3.5" />
               </button>
