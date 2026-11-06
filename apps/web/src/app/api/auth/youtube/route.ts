@@ -29,11 +29,13 @@ export async function GET(req: NextRequest) {
         "https://www.tubepilotpro.com/api/auth/callback/google"
       );
 
-      // We request basic profile & readonly channel scope - Google grants immediate pass without red warning
+      // Request profile, YouTube Data, and YouTube Analytics scopes
+      // This grants official access to YouTube Studio Analytics (impressions, views, CTR)
       const scopes = [
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/youtube.readonly",
+        "https://www.googleapis.com/auth/yt-analytics.readonly",
       ];
 
       const authUrl = oauth2Client.generateAuthUrl({

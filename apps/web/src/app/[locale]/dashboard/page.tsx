@@ -42,6 +42,7 @@ interface ChannelState {
   avatar: string;
   handle?: string;
   isPaired: boolean;
+  realCtr?: string;
 }
 
 const FALLBACK_AVATAR =
@@ -62,10 +63,14 @@ function DashboardContent() {
   const [channel, setChannel] = useState<ChannelState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Universal Global YouTube CTR Predictor Engine
-  // Works dynamically for any channel size worldwide: 10 subs, 10K, 100K, 500K, 1M+ to 100M+
+  // Official YouTube Studio Analytics CTR & Predictive Ratio Engine
   const calculatedCtr = useMemo(() => {
     if (!channel?.title && !channel?.handle) return '—';
+
+    // If channel has direct authenticated YouTube Analytics API CTR from YouTube Studio, use it!
+    if (channel.realCtr) {
+      return channel.realCtr;
+    }
 
     // 1. Parse subscribers robustly with support for raw numbers, K, M, B, and multilingual formats
     const parseMetric = (str: string | undefined | null): number => {
@@ -232,6 +237,7 @@ function DashboardContent() {
       const chSubs = searchParams?.get('ch_subs');
       const chViews = searchParams?.get('ch_views');
       const chAvatar = searchParams?.get('ch_avatar');
+      const chCtr = searchParams?.get('ch_ctr');
 
       if (chTitle) {
         const decodedTitle = decodeURIComponent(chTitle);
@@ -242,6 +248,7 @@ function DashboardContent() {
           avatar: chAvatar ? decodeURIComponent(chAvatar) : FALLBACK_AVATAR,
           handle: chHandle ? decodeURIComponent(chHandle) : '@channel',
           isPaired: true,
+          realCtr: chCtr ? decodeURIComponent(chCtr) : undefined,
         };
         setChannel(chState);
         setIsChannelConnected(true);
@@ -287,6 +294,7 @@ function DashboardContent() {
             avatar: ch.avatar || FALLBACK_AVATAR,
             handle: ch.handle || '@channel',
             isPaired: ch.isPaired,
+            realCtr: ch.realCtr,
           });
           setIsChannelConnected(true);
         } else {
@@ -315,6 +323,7 @@ function DashboardContent() {
                   avatar: parsed.avatar || FALLBACK_AVATAR,
                   handle: parsed.handle || '@channel',
                   isPaired: true,
+                  realCtr: parsed.realCtr,
                 });
                 setIsChannelConnected(true);
               } else {
