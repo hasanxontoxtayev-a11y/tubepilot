@@ -26,7 +26,9 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
-    // Safe database read if available
+    // STRICT MULTI-TENANT ISOLATION:
+    // Only return channel if and ONLY IF the current session/user actually owns it.
+    // NEVER fallback to global findFirst() which leaks other users' channels!
     let ch = null;
     let user = null;
     try {
@@ -49,14 +51,8 @@ export async function GET(req: NextRequest) {
           }
         }
       }
-
-      if (!ch) {
-        ch = await prisma.youTubeChannel.findFirst({
-          orderBy: { updatedAt: 'desc' },
-        });
-      }
     } catch (dbErr) {
-      // Serverless without SQLite file - expected, gracefully fallback
+      // Serverless without DB - expected
     }
 
     const subscription = {
