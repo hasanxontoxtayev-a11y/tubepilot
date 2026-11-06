@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ success: true, message: 'YouTube channel disconnected successfully' });
     response.cookies.delete('kanal_user_id');
     response.cookies.delete('tubepilot_google_connected');
+    response.cookies.delete('tubepilot_connected_channel');
     return response;
   } catch (error: any) {
     console.error('Failed to disconnect channel:', error);

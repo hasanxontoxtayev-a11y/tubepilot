@@ -325,6 +325,9 @@ function DashboardContent() {
     setChannel(null);
     try {
       localStorage.clear();
+      document.cookie = 'tubepilot_connected_channel=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'tubepilot_google_connected=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'kanal_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     } catch {}
     showNotification('YouTube kanali to\'liq uzildi va tozalandi.');
   };

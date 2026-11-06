@@ -32,24 +32,31 @@ export async function GET(req: NextRequest) {
     const userInfo = await oauth2.userinfo.get();
 
     // Fetch channel metadata
-    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
+    let channelTitle = userInfo.data.name || 'YouTube Creator';
+    let channelHandle = `@${(userInfo.data.name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
+    let channelAvatar = userInfo.data.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80';
+    let channelSubs = '0';
+    let channelViews = '0';
     let channelItem = null;
+
     try {
+      const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
       const channelRes = await youtube.channels.list({
         part: ['snippet', 'statistics'],
         mine: true,
       });
       channelItem = channelRes.data.items?.[0] || null;
-    } catch (ytErr) {
-      console.warn('[YouTube API] channels.list error:', ytErr);
+      if (channelItem) {
+        channelTitle = channelItem.snippet?.title || channelTitle;
+        channelHandle = channelItem.snippet?.customUrl || channelHandle;
+        channelAvatar = channelItem.snippet?.thumbnails?.high?.url || channelItem.snippet?.thumbnails?.default?.url || channelAvatar;
+        channelSubs = channelItem.statistics?.subscriberCount || '0';
+        channelViews = channelItem.statistics?.viewCount || '0';
+      }
+    } catch (ytErr: any) {
+      console.warn('[YouTube API] channels.list error ignored gracefully:', ytErr?.message || ytErr);
+      // Fallback: Use Google account identity directly so user is NEVER blocked by API enabling issues
     }
-
-    // If Google account has no dedicated YouTube channel yet, use Google user info gracefully
-    const channelTitle = channelItem?.snippet?.title || userInfo.data.name || 'YouTube Creator';
-    const channelHandle = channelItem?.snippet?.customUrl || `@${(userInfo.data.name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
-    const channelAvatar = channelItem?.snippet?.thumbnails?.high?.url || channelItem?.snippet?.thumbnails?.default?.url || userInfo.data.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80';
-    const channelSubs = channelItem?.statistics?.subscriberCount || '0';
-    const channelViews = channelItem?.statistics?.viewCount || '0';
 
     let activeUserId = req.cookies.get('kanal_user_id')?.value;
     let currentUser = null;
