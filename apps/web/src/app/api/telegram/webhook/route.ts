@@ -15,6 +15,41 @@ export async function POST(req: NextRequest) {
       const messageId = cb.message?.message_id;
       const chatId = cb.message?.chat?.id;
 
+      if (callbackData === 'trigger_test_comment') {
+        const samplePrompt = 
+          `💬 **Yangi YouTube Izohi Aniqlandi!**\n\n` +
+          `👤 **Tomoshabin:** @music_fan_2026\n` +
+          `🎬 **Video:** BeatNova — Yangi Premyera\n` +
+          `📝 **Izoh:** "Bu qo'shiq juda ajoyib chiqibdi! To'liq albom qachon chiqadi?"\n\n` +
+          `🤖 **AI Agent Tayyorlagan Javob:**\n` +
+          `"Kattakon rahmat! Yaqin kunlarda to'liq albom taqdim etiladi, kanalimizni kuzatib boring! 🎧🔥"`;
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ callback_query_id: cb.id }),
+        });
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: samplePrompt,
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '✅ Tasdiqlash va Yuborish', callback_data: 'approve_comment:sample123' },
+                  { text: '❌ Rad etish', callback_data: 'dismiss_comment:sample123' }
+                ]
+              ]
+            }
+          }),
+        });
+        return NextResponse.json({ ok: true });
+      }
+
       if (callbackData.startsWith('approve_comment:')) {
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
           method: 'POST',
@@ -84,6 +119,7 @@ export async function POST(req: NextRequest) {
           `• 🖼️ **Muqova CTR Tahlil:** Istalgan rasmni yuboring — Gemini Vision uni baholaydi.\n\n` +
           `🌐 **Boshqaruv markazi:** [tubepilotpro.com](https://www.tubepilotpro.com/uz/dashboard)`;
 
+        // Send inline buttons with direct links
         const keyboard = {
           inline_keyboard: [
             [
@@ -92,6 +128,9 @@ export async function POST(req: NextRequest) {
             [
               { text: '🔗 YouTube Kanalni Ulash', url: 'https://www.tubepilotpro.com/uz/dashboard?oauth_modal=true' },
               { text: '📊 Kanal Auditi', url: 'https://www.tubepilotpro.com/uz/dashboard#channel-audit' }
+            ],
+            [
+              { text: '💬 AI Izoh Sinovi', callback_data: 'trigger_test_comment' }
             ]
           ]
         };
@@ -106,7 +145,27 @@ export async function POST(req: NextRequest) {
             reply_markup: keyboard,
           }),
         });
-      } else if (text.startsWith('/test_comment')) {
+
+        // Also restore the permanent bottom keyboard buttons
+        const bottomKeyboard = {
+          keyboard: [
+            [{ text: '🔍 Kanal Auditi' }, { text: '💬 AI Izoh Sinovi' }],
+            [{ text: '🌐 Saytga o\'tish' }, { text: '❓ Yordam / FAQ' }]
+          ],
+          resize_keyboard: true,
+          persistent: true
+        };
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: '👇 Quyidagi menyu tugmalaridan foydalanishingiz mumkin:',
+            reply_markup: bottomKeyboard,
+          }),
+        });
+      } else if (text.startsWith('/test_comment') || text.includes('AI Izoh Sinovi')) {
         // Instant simulated comment to showcase autonomous AI response
         const samplePrompt = 
           `💬 **Yangi YouTube Izohi Aniqlandi!**\n\n` +
