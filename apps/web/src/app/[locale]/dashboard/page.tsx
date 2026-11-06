@@ -601,13 +601,13 @@ function DashboardContent() {
             </div>
             <div className="relative z-10 flex items-baseline justify-between">
               <h3 className="text-2xl font-black text-white tracking-tight">
-                {isChannelConnected && channel && channel.subscribers && channel.subscribers !== '0'
-                  ? channel.subscribers
-                  : (isChannelConnected ? '607' : '—')}
+                {isChannelConnected && channel
+                  ? (channel.subscribers || '0')
+                  : '—'}
               </h3>
               {isChannelConnected && (
                 <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  +12.4% o&apos;sish
+                  Real vaqt
                 </span>
               )}
             </div>
@@ -624,9 +624,9 @@ function DashboardContent() {
             </div>
             <div className="relative z-10 flex items-baseline justify-between">
               <h3 className="text-2xl font-black text-white tracking-tight">
-                {isChannelConnected && channel && channel.views && channel.views !== '0'
-                  ? channel.views
-                  : (isChannelConnected ? '207,132' : '—')}
+                {isChannelConnected && channel
+                  ? (channel.views || '0')
+                  : '—'}
               </h3>
               {isChannelConnected && (
                 <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-malla-500/15 text-malla-300 border border-malla-400/30">

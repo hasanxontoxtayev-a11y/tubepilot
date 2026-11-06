@@ -350,11 +350,11 @@ export function ChannelAudit({
                   <div className="grid grid-cols-2 gap-2 pt-2 border-t border-dark-750 text-xs">
                     <div className="p-2 rounded-lg bg-dark-900 border border-dark-800">
                       <span className="text-[10px] text-gray-400 block">Subscribers</span>
-                      <strong className="text-white text-xs">{connectedChannel?.subscribers && connectedChannel.subscribers !== '0' ? connectedChannel.subscribers : (connectedChannel ? '607' : '—')}</strong>
+                      <strong className="text-white text-xs">{connectedChannel?.subscribers || '—'}</strong>
                     </div>
                     <div className="p-2 rounded-lg bg-dark-900 border border-dark-800">
                       <span className="text-[10px] text-gray-400 block">Lifetime Views</span>
-                      <strong className="text-white text-xs">{connectedChannel?.views && connectedChannel.views !== '0' ? connectedChannel.views : (connectedChannel ? '207,132' : '—')}</strong>
+                      <strong className="text-white text-xs">{connectedChannel?.views || '—'}</strong>
                     </div>
                   </div>
                 </div>
