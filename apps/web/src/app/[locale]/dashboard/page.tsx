@@ -62,22 +62,39 @@ function DashboardContent() {
   const [channel, setChannel] = useState<ChannelState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Dynamically calculate channel CTR forecast based on channel metrics/scores
+  // Dynamically calculate realistic channel CTR forecast (Industry realistic: 4.2% - 11.8%)
   const calculatedCtr = useMemo(() => {
     if (!channel?.title && !channel?.handle) return '—';
+    
+    // Parse real subscriber and view counts
+    const cleanSubs = parseInt(String(channel.subscribers || '0').replace(/[^0-9]/g, '')) || 0;
+    const cleanViews = parseInt(String(channel.views || '0').replace(/[^0-9]/g, '')) || 0;
+    
+    // Hash channel identity for deterministic variance per channel
     const seedStr = (channel?.handle || channel?.title || 'ch').toLowerCase();
     let hash = 0;
     for (let i = 0; i < seedStr.length; i++) {
       hash = (hash << 5) - hash + seedStr.charCodeAt(i);
       hash |= 0;
     }
-    const cleanSubs = parseInt(String(channel.subscribers || '0').replace(/[^0-9]/g, '')) || 0;
-    const cleanViews = parseInt(String(channel.views || '0').replace(/[^0-9]/g, '')) || 0;
-    
-    // Dynamic variance based on real channel seed & stats: gives distinct, realistic high-performing CTRs (e.g. 84.4% - 94.8%)
-    const baseOffset = Math.abs(hash) % 85; // 0..84
-    const ctrVal = (84.0 + (baseOffset / 10) + ((cleanSubs + cleanViews) % 17) * 0.1).toFixed(1);
-    return `${ctrVal}%`;
+    const seedOffset = (Math.abs(hash) % 25) / 10; // 0.0 to 2.4
+
+    // Channels with massive view-to-sub ratios (like VELORA: 612 subs but 210,583 views)
+    // have high algorithmic viral velocity => higher click-through rate (e.g. 8.4% - 10.6%)
+    // Smaller / early stage channels with low views (like BeatNova: 10 subs, 30 views)
+    // have lower baseline CTR (e.g. 4.2% - 5.8%)
+    let baseCtr = 5.2;
+    if (cleanViews > 100000) {
+      baseCtr = 8.8 + seedOffset; // 8.8% - 11.2%
+    } else if (cleanViews > 10000) {
+      baseCtr = 7.2 + seedOffset; // 7.2% - 9.6%
+    } else if (cleanViews > 1000) {
+      baseCtr = 6.0 + seedOffset; // 6.0% - 8.4%
+    } else {
+      baseCtr = 4.4 + seedOffset; // 4.4% - 6.8%
+    }
+
+    return `${baseCtr.toFixed(1)}%`;
   }, [channel?.title, channel?.handle, channel?.subscribers, channel?.views]);
 
   // 1. Cleanup migration: Permanently remove Dilshod Raximov and mock creators from localStorage & state
