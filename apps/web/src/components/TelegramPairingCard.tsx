@@ -6,10 +6,18 @@ import { Send, CheckCircle2, Copy, ExternalLink, Loader2, QrCode, AlertCircle, R
 interface TelegramPairingProps {
   isPaired: boolean;
   telegramUsername?: string | null;
+  connectedHandle?: string | null;
+  connectedTitle?: string | null;
   onPairSuccess?: (username?: string) => void;
 }
 
-export function TelegramPairingCard({ isPaired: initialPaired, telegramUsername: initialUsername, onPairSuccess }: TelegramPairingProps) {
+export function TelegramPairingCard({
+  isPaired: initialPaired,
+  telegramUsername: initialUsername,
+  connectedHandle,
+  connectedTitle,
+  onPairSuccess
+}: TelegramPairingProps) {
   const [loading, setLoading] = useState(false);
   const [deepLink, setDeepLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -60,7 +68,14 @@ export function TelegramPairingCard({ isPaired: initialPaired, telegramUsername:
     setLoading(true);
     setPopupBlocked(false);
     try {
-      const res = await fetch('/api/telegram/pair', { method: 'POST' });
+      const res = await fetch('/api/telegram/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channelHandle: connectedHandle || undefined,
+          channelTitle: connectedTitle || undefined,
+        }),
+      });
       const data = await res.json();
       if (data.deepLink) {
         setDeepLink(data.deepLink);

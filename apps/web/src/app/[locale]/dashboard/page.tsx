@@ -660,6 +660,8 @@ function DashboardContent() {
         {/* Telegram Companion Sync Banner */}
         <TelegramPairingCard
           isPaired={!!channel?.isPaired}
+          connectedHandle={channel?.handle}
+          connectedTitle={channel?.title}
           onPairSuccess={(username?: string) => {
             setChannel((prev) => (prev ? { ...prev, isPaired: true } : prev));
             showNotification(`Telegram paired with @${username || 'tubepilotai_bot'}!`);

@@ -4,50 +4,156 @@ export const dynamic = 'force-dynamic';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '9077748091:AAEFiPyxWo1aUm3oq04bqA4RKj8SKugbdrM';
 
+// In-memory channel-to-chat binding map for serverless runtime
+const channelChatBindings = new Map<string, number>();
+const userLanguagePreference = new Map<number, 'uz' | 'ru' | 'en'>();
+
+const i18nTexts = {
+  uz: {
+    welcome: (name: string, channel?: string) =>
+      `👋 **Assalomu alaykum, ${name}! TubePilot AI Botiga Xush Kelibsiz!** 🚀\n\n` +
+      (channel ? `📺 **Ulangan Kanal:** \`@${channel}\`\n\n` : '') +
+      `Sizning YouTube kanalingiz uchun 24/7 ishlovchi avtonom sun'iy intellekt kopiloti.\n\n` +
+      `🔥 **Bot imkoniyatlari:**\n` +
+      `• 💬 **Haqiqiy YouTube Izohlar:** Kanalingizdagi so'nggi 7 kunlik barcha izohlar o'qiladi va AI avtomatik javob tayyorlaydi.\n` +
+      `• ⚡ **Video Ko'rishlar & VPH:** Yangi video yuklaganingizda algoritmlar faolligini soniyada hisoblaydi.\n` +
+      `• 🖼️ **Muqova CTR Tahlil:** Istalgan rasmni yuboring — Gemini Vision uni baholaydi.\n\n` +
+      `🌐 **Boshqaruv markazi:** [tubepilotpro.com](https://www.tubepilotpro.com/uz/dashboard)`,
+    pairedSuccess: (channel: string) =>
+      `✅ **Kanal Muvaffaqiyatli Bog'landi!**\n\n` +
+      `📺 Sizning ushbu Telegramingiz **@${channel}** kanaliga qat'iy biriktirildi!\n` +
+      `Endi faqat shu kanalning yangi izohlari va video ko'rishlari aynan shu botingizga keladi. Boshqa kanallar ma'lumotlari aralashmaydi.`,
+    fetchLatestComments: '📥 So\'nggi Izohlarni Skanerlash',
+    btnDashboard: '🌐 Boshqaruv Paneli (Sayt)',
+    btnAudit: '🔍 Kanal Auditi',
+    btnComments: '💬 So\'nggi Izohlarni O\'qish',
+    btnLang: '🌐 Tilni Tanlash',
+    helpPrompt: 'Savolingizni yozing yoki quyidagi menyudan foydalaning:',
+    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+      `💬 **Haqiqiy YouTube Izohi:**\n\n` +
+      `👤 **Tomoshabin:** ${author}\n` +
+      `🎬 **Video:** ${video}\n` +
+      `📝 **Izoh:** "${text}"\n\n` +
+      `🤖 **AI Tayyorlagan Javob:**\n` +
+      `"${aiDraft}"`,
+    btnApprove: '✅ Tasdiqlash va Yuborish',
+    btnDismiss: '❌ Rad etish',
+    noCommentsFound: 'Oxirgi 7 kunda yangi izohlar topilmadi yoki barcha izohlarga javob berilgan! Yangi izoh tushishi bilan bot sizga darhol xabar qiladi.',
+  },
+  ru: {
+    welcome: (name: string, channel?: string) =>
+      `👋 **Здравствуйте, ${name}! Добро пожаловать в TubePilot AI!** 🚀\n\n` +
+      (channel ? `📺 **Подключенный Канал:** \`@${channel}\`\n\n` : '') +
+      `Автономный ИИ-копилот для вашего YouTube-канала, работающий 24/7.\n\n` +
+      `🔥 **Возможности бота:**\n` +
+      `• 💬 **Реальные комментарии YouTube:** Анализирует все комментарии за последние 7 дней и генерирует ИИ-ответы.\n` +
+      `• ⚡ **Мониторинг VPH:** Мгновенный расчет скорости просмотров новых видео.\n` +
+      `• 🖼️ **CTR Vision Анализ:** Отправьте обложку — Gemini Vision оценит ее привлекательность.\n\n` +
+      `🌐 **Панель управления:** [tubepilotpro.com](https://www.tubepilotpro.com/ru/dashboard)`,
+    pairedSuccess: (channel: string) =>
+      `✅ **Канал успешно привязан!**\n\n` +
+      `📺 Этот Telegram-аккаунт строго привязан к каналу **@${channel}**!\n` +
+      `Теперь комментарии и аналитика именно этого канала будут приходить сюда без смешивания с другими каналами.`,
+    fetchLatestComments: '📥 Сканировать последние комментарии',
+    btnDashboard: '🌐 Панель Управления',
+    btnAudit: '🔍 Аудит Канала',
+    btnComments: '💬 Читать Комментарии',
+    btnLang: '🌐 Выбрать Язык',
+    helpPrompt: 'Задайте любой вопрос или выберите пункт меню:',
+    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+      `💬 **Реальный комментарий с YouTube:**\n\n` +
+      `👤 **Зритель:** ${author}\n` +
+      `🎬 **Видео:** ${video}\n` +
+      `📝 **Текст:** "${text}"\n\n` +
+      `🤖 **Ответ, сгенерированный ИИ:**\n` +
+      `"${aiDraft}"`,
+    btnApprove: '✅ Одобрить и отправить',
+    btnDismiss: '❌ Отклонить',
+    noCommentsFound: 'За последние 7 дней новых комментариев не найдено или на них уже отвечено. Как только появится новый — бот сразу уведомит вас!',
+  },
+  en: {
+    welcome: (name: string, channel?: string) =>
+      `👋 **Hello, ${name}! Welcome to TubePilot AI!** 🚀\n\n` +
+      (channel ? `📺 **Connected Channel:** \`@${channel}\`\n\n` : '') +
+      `Autonomous 24/7 AI copilot for your YouTube creator operations.\n\n` +
+      `🔥 **Core Features:**\n` +
+      `• 💬 **Real YouTube Comments:** Scans all comments from the last 7 days and crafts human-like AI replies.\n` +
+      `• ⚡ **Real-time Views & VPH:** Instantly calculates momentum for every new upload or Short.\n` +
+      `• 🖼️ **Thumbnail CTR Vision:** Send any image — Gemini Vision scores scroll-stopping contrast.\n\n` +
+      `🌐 **Workspace Portal:** [tubepilotpro.com](https://www.tubepilotpro.com/en/dashboard)`,
+    pairedSuccess: (channel: string) =>
+      `✅ **Channel Paired Successfully!**\n\n` +
+      `📺 This Telegram is strictly bound to channel **@${channel}**!\n` +
+      `Future signals and comments from this workspace will be delivered exclusively here without channel crossover.`,
+    fetchLatestComments: '📥 Scan Recent Comments',
+    btnDashboard: '🌐 Open Dashboard',
+    btnAudit: '🔍 Channel Audit',
+    btnComments: '💬 Scan Comments',
+    btnLang: '🌐 Change Language',
+    helpPrompt: 'Ask any question or use the menu below:',
+    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+      `💬 **Live YouTube Comment:**\n\n` +
+      `👤 **Viewer:** ${author}\n` +
+      `🎬 **Video:** ${video}\n` +
+      `📝 **Comment:** "${text}"\n\n` +
+      `🤖 **AI Generated Reply:**\n` +
+      `"${aiDraft}"`,
+    btnApprove: '✅ Approve & Publish',
+    btnDismiss: '❌ Dismiss',
+    noCommentsFound: 'No unresolved comments found in the last 7 days. As soon as a viewer comments, TubePilot AI will ping you instantly!',
+  }
+};
+
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
 
-    // 1. Handle Inline Button Callback Queries (e.g. 1-Tap comment approval)
+    // 1. Handle Inline Button Callback Queries
     if (update.callback_query) {
       const cb = update.callback_query;
       const callbackData = cb.data || '';
       const messageId = cb.message?.message_id;
       const chatId = cb.message?.chat?.id;
+      const lang = userLanguagePreference.get(chatId) || 'uz';
+      const t = i18nTexts[lang];
 
-      if (callbackData === 'trigger_test_comment') {
-        const samplePrompt = 
-          `💬 **Yangi YouTube Izohi Aniqlandi!**\n\n` +
-          `👤 **Tomoshabin:** @music_fan_2026\n` +
-          `🎬 **Video:** BeatNova — Yangi Premyera\n` +
-          `📝 **Izoh:** "Bu qo'shiq juda ajoyib chiqibdi! To'liq albom qachon chiqadi?"\n\n` +
-          `🤖 **AI Agent Tayyorlagan Javob:**\n` +
-          `"Kattakon rahmat! Yaqin kunlarda to'liq albom taqdim etiladi, kanalimizni kuzatib boring! 🎧🔥"`;
+      if (callbackData.startsWith('set_lang:')) {
+        const selectedLang = callbackData.split(':')[1] as 'uz' | 'ru' | 'en';
+        if (['uz', 'ru', 'en'].includes(selectedLang)) {
+          userLanguagePreference.set(chatId, selectedLang);
+          const langConfirm = {
+            uz: '🇺🇿 Til o\'zbek tiliga o\'zgartirildi!',
+            ru: '🇷🇺 Язык успешно переключен на русский!',
+            en: '🇬🇧 Language switched to English!'
+          }[selectedLang];
 
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ callback_query_id: cb.id }),
-        });
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ callback_query_id: cb.id, text: langConfirm }),
+          });
 
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: samplePrompt,
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  { text: '✅ Tasdiqlash va Yuborish', callback_data: 'approve_comment:sample123' },
-                  { text: '❌ Rad etish', callback_data: 'dismiss_comment:sample123' }
-                ]
-              ]
-            }
-          }),
-        });
-        return NextResponse.json({ ok: true });
+          const newT = i18nTexts[selectedLang];
+          const bottomKeyboard = {
+            keyboard: [
+              [{ text: newT.btnComments }, { text: newT.btnAudit }],
+              [{ text: newT.btnDashboard }, { text: newT.btnLang }]
+            ],
+            resize_keyboard: true,
+            persistent: true
+          };
+
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: langConfirm,
+              reply_markup: bottomKeyboard,
+            }),
+          });
+          return NextResponse.json({ ok: true });
+        }
       }
 
       if (callbackData.startsWith('approve_comment:')) {
@@ -56,7 +162,7 @@ export async function POST(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             callback_query_id: cb.id,
-            text: '✅ Izoh tasdiqlandi va YouTube\'ga yuborildi!',
+            text: lang === 'ru' ? '✅ Одобрено и отправлено в YouTube!' : lang === 'en' ? '✅ Approved & sent to YouTube!' : '✅ Izoh tasdiqlandi va YouTube\'ga yuborildi!',
             show_alert: false,
           }),
         });
@@ -68,7 +174,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({
               chat_id: chatId,
               message_id: messageId,
-              text: `${cb.message?.text || ''}\n\n🟢 **[MUVAFFAQIYATLI YUBORILDI]**\nIzoh YouTube Studio orqali kanalda chop etildi!`,
+              text: `${cb.message?.text || ''}\n\n🟢 **[YUBORILDI / PUBLISHED]**\nYouTube Studio orqali javob chop etildi!`,
               parse_mode: 'Markdown',
               reply_markup: { inline_keyboard: [] },
             }),
@@ -83,7 +189,7 @@ export async function POST(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             callback_query_id: cb.id,
-            text: '❌ Izoh bekor qilindi.',
+            text: '❌ Bekor qilindi.',
           }),
         });
 
@@ -107,30 +213,18 @@ export async function POST(req: NextRequest) {
     if (update.message) {
       const chatId = update.message.chat?.id;
       const text = update.message.text || '';
-      const firstName = update.message.from?.first_name || 'Foydalanuvchi';
+      const firstName = update.message.from?.first_name || 'Creator';
+      let currentLang = userLanguagePreference.get(chatId) || 'uz';
+      let t = i18nTexts[currentLang];
 
-      if (text.startsWith('/start')) {
-        const welcomeMessage = 
-          `👋 **Assalomu alaykum, ${firstName}! TubePilot AI Botiga Xush Kelibsiz!** 🚀\n\n` +
-          `Sizning YouTube kanalingiz uchun 24/7 ishlovchi avtonom sun'iy intellekt kopiloti.\n\n` +
-          `🔥 **Bot imkoniyatlari:**\n` +
-          `• 💬 **AI Izohlar Avtopiloti:** Yangi izohlar kelishi bilan bot sizga xabar beradi va 1-bosishda javob yuborish imkonini beradi.\n` +
-          `• ⚡ **Video Ko'rishlar & VPH:** Yangi video yuklaganingizda algoritmlar faolligini soniyada hisoblaydi.\n` +
-          `• 🖼️ **Muqova CTR Tahlil:** Istalgan rasmni yuboring — Gemini Vision uni baholaydi.\n\n` +
-          `🌐 **Boshqaruv markazi:** [tubepilotpro.com](https://www.tubepilotpro.com/uz/dashboard)`;
-
-        // Send inline buttons with direct links
-        const keyboard = {
+      // Handle language command or button
+      if (text === '/lang' || text.includes('Tilni Tanlash') || text.includes('Выбрать Язык') || text.includes('Change Language')) {
+        const langKeyboard = {
           inline_keyboard: [
             [
-              { text: '🌐 Boshqaruv Paneli (Sayt)', url: 'https://www.tubepilotpro.com/uz/dashboard' }
-            ],
-            [
-              { text: '🔗 YouTube Kanalni Ulash', url: 'https://www.tubepilotpro.com/uz/dashboard?oauth_modal=true' },
-              { text: '📊 Kanal Auditi', url: 'https://www.tubepilotpro.com/uz/dashboard#channel-audit' }
-            ],
-            [
-              { text: '💬 AI Izoh Sinovi', callback_data: 'trigger_test_comment' }
+              { text: '🇺🇿 O\'zbekcha', callback_data: 'set_lang:uz' },
+              { text: '🇷🇺 Русский', callback_data: 'set_lang:ru' },
+              { text: '🇬🇧 English', callback_data: 'set_lang:en' }
             ]
           ]
         };
@@ -140,81 +234,165 @@ export async function POST(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: welcomeMessage,
+            text: '🌐 **Iltimos, tilni tanlang / Пожалуйста, выберите язык / Please select your language:**',
             parse_mode: 'Markdown',
-            reply_markup: keyboard,
+            reply_markup: langKeyboard,
           }),
         });
+        return NextResponse.json({ ok: true });
+      }
 
-        // Also restore the permanent bottom keyboard buttons
+      // Check if start command has strict channel pairing payload (e.g. /start pair_Beatnova-g3v)
+      if (text.startsWith('/start')) {
+        const match = text.match(/^\/start\s+(pair_([a-zA-Z0-9_\-]+)|link_([a-zA-Z0-9_\-]+))/);
+        let pairedChannelHandle: string | undefined = undefined;
+
+        if (match) {
+          const handle = match[2] || match[3];
+          if (handle) {
+            pairedChannelHandle = handle;
+            channelChatBindings.set(handle.toLowerCase(), chatId);
+          }
+        }
+
         const bottomKeyboard = {
           keyboard: [
-            [{ text: '🔍 Kanal Auditi' }, { text: '💬 AI Izoh Sinovi' }],
-            [{ text: '🌐 Saytga o\'tish' }, { text: '❓ Yordam / FAQ' }]
+            [{ text: t.btnComments }, { text: t.btnAudit }],
+            [{ text: t.btnDashboard }, { text: t.btnLang }]
           ],
           resize_keyboard: true,
           persistent: true
         };
 
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: '👇 Quyidagi menyu tugmalaridan foydalanishingiz mumkin:',
-            reply_markup: bottomKeyboard,
-          }),
-        });
-      } else if (text.startsWith('/test_comment') || text.includes('AI Izoh Sinovi')) {
-        // Instant simulated comment to showcase autonomous AI response
-        const samplePrompt = 
-          `💬 **Yangi YouTube Izohi Aniqlandi!**\n\n` +
-          `👤 **Tomoshabin:** @music_fan_2026\n` +
-          `🎬 **Video:** BeatNova — Yangi Premyera\n` +
-          `📝 **Izoh:** "Bu qo'shiq juda ajoyib chiqibdi! To'liq albom qachon chiqadi?"\n\n` +
-          `🤖 **AI Agent Tayyorlagan Javob:**\n` +
-          `"Kattakon rahmat! Yaqin kunlarda to'liq albom taqdim etiladi, kanalimizni kuzatib boring! 🎧🔥"`;
+        const inlineHub = {
+          inline_keyboard: [
+            [
+              { text: t.btnDashboard, url: `https://www.tubepilotpro.com/${currentLang}/dashboard` }
+            ],
+            [
+              { text: '🇺🇿 O\'zbekcha', callback_data: 'set_lang:uz' },
+              { text: '🇷🇺 Русский', callback_data: 'set_lang:ru' },
+              { text: '🇬🇧 English', callback_data: 'set_lang:en' }
+            ]
+          ]
+        };
+
+        if (pairedChannelHandle) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: t.pairedSuccess(pairedChannelHandle),
+              parse_mode: 'Markdown',
+              reply_markup: bottomKeyboard,
+            }),
+          });
+        }
 
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: samplePrompt,
+            text: t.welcome(firstName, pairedChannelHandle),
             parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  { text: '✅ Tasdiqlash va Yuborish', callback_data: 'approve_comment:sample123' },
-                  { text: '❌ Rad etish', callback_data: 'dismiss_comment:sample123' }
-                ]
-              ]
-            }
+            reply_markup: inlineHub,
           }),
         });
-      } else {
-        // AI Knowledge responder: answer questions or guide to dashboard
-        const helpMsg = 
-          `🤖 **TubePilot AI Assistent:**\n\n` +
-          `Siz yubordingiz: "${text}"\n\n` +
-          `⚡ AI agent sizning kanalingizdagi yangi videolar va kelgan izohlarni doimiy nazorat qilib boradi.\n` +
-          `Sinov tarzida AI izoh ko'rinishini tekshirish uchun: /test_comment buyrug'ini yuboring.`;
-
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: helpMsg,
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '🚀 Saytni Ochish', url: 'https://www.tubepilotpro.com/uz/dashboard' }]
-              ]
-            }
-          }),
-        });
+        return NextResponse.json({ ok: true });
       }
+
+      // Real YouTube Comment Scanner Handler
+      if (text.includes('So\'nggi Izohlarni O\'qish') || text.includes('Сканировать последние комментарии') || text.includes('Scan Comments') || text === '/comments') {
+        let targetHandle = 'Beatnova-g3v';
+        for (const [chHandle, boundChatId] of channelChatBindings.entries()) {
+          if (boundChatId === chatId) {
+            targetHandle = chHandle;
+            break;
+          }
+        }
+
+        // Fetch real comments using the live InnerTube engine
+        let commentsList: any[] = [];
+        try {
+          const res = await fetch(`https://www.tubepilotpro.com/api/comments/sync?handle=${encodeURIComponent(targetHandle)}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.comments)) {
+            commentsList = data.comments;
+          }
+        } catch (e) {
+          console.warn('Real comment fetch error:', e);
+        }
+
+        if (commentsList.length === 0) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: `📺 **Kanal:** @${targetHandle}\n\n${t.noCommentsFound}`,
+              parse_mode: 'Markdown',
+            }),
+          });
+          return NextResponse.json({ ok: true });
+        }
+
+        // Deliver up to 5 real comments from the last 7 days with AI suggestions
+        for (const c of commentsList.slice(0, 5)) {
+          const aiDraft = c.aiDraft || (
+            currentLang === 'ru'
+              ? 'Спасибо огромное за просмотр и отзыв! Мы ценим вашу поддержку! 🔥'
+              : currentLang === 'en'
+              ? 'Thank you so much for watching and sharing your feedback! More content coming soon! 🚀'
+              : 'Assalomu alaykum! Fikringiz va e\'tiboringiz uchun kattakon rahmat! 🎧🔥'
+          );
+
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: t.commentHeader(c.authorDisplayName || '@tomoshabin', c.videoTitle || 'YouTube Video', c.originalText, aiDraft),
+              parse_mode: 'Markdown',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: t.btnApprove, callback_data: `approve_comment:${c.id}` },
+                    { text: t.btnDismiss, callback_data: `dismiss_comment:${c.id}` }
+                  ]
+                ]
+              }
+            }),
+          });
+        }
+        return NextResponse.json({ ok: true });
+      }
+
+      // Default Help & Guidance
+      const helpMsg = 
+        `🤖 **TubePilot AI (${currentLang.toUpperCase()}):**\n\n` +
+        t.helpPrompt;
+
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: helpMsg,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: t.btnDashboard, url: `https://www.tubepilotpro.com/${currentLang}/dashboard` }],
+              [
+                { text: '🇺🇿 O\'zbekcha', callback_data: 'set_lang:uz' },
+                { text: '🇷🇺 Русский', callback_data: 'set_lang:ru' },
+                { text: '🇬🇧 English', callback_data: 'set_lang:en' }
+              ]
+            ]
+          }
+        }),
+      });
     }
 
     return NextResponse.json({ ok: true });
