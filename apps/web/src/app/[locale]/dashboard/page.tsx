@@ -62,39 +62,80 @@ function DashboardContent() {
   const [channel, setChannel] = useState<ChannelState | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Dynamically calculate realistic channel CTR forecast (Industry realistic: 4.2% - 11.8%)
+  // Universal Global YouTube CTR Predictor Engine
+  // Works dynamically for any channel size worldwide: 10 subs, 10K, 100K, 500K, 1M+ to 100M+
   const calculatedCtr = useMemo(() => {
     if (!channel?.title && !channel?.handle) return '—';
-    
-    // Parse real subscriber and view counts
-    const cleanSubs = parseInt(String(channel.subscribers || '0').replace(/[^0-9]/g, '')) || 0;
-    const cleanViews = parseInt(String(channel.views || '0').replace(/[^0-9]/g, '')) || 0;
-    
-    // Hash channel identity for deterministic variance per channel
-    const seedStr = (channel?.handle || channel?.title || 'ch').toLowerCase();
+
+    // 1. Parse subscribers robustly with support for raw numbers, K, M, B, and multilingual formats
+    const parseMetric = (str: string | undefined | null): number => {
+      if (!str) return 0;
+      let s = str.trim().toLowerCase().replace(',', '.');
+      const isM = /m|mln|млн/.test(s);
+      const isK = /k|ming|тыс/.test(s);
+      const isB = /b|mlrd|млрд/.test(s);
+      const numMatch = s.match(/[\d\.]+/);
+      if (!numMatch) return 0;
+      const val = parseFloat(numMatch[0]);
+      if (isNaN(val)) return 0;
+      if (isB) return Math.round(val * 1000000000);
+      if (isM) return Math.round(val * 1000000);
+      if (isK) return Math.round(val * 1000);
+      // Clean raw numeric string
+      return Math.round(parseFloat(s.replace(/[^0-9]/g, '')) || 0);
+    };
+
+    const subs = parseMetric(channel.subscribers);
+    const views = parseMetric(channel.views);
+
+    // 2. Deterministic channel fingerprint seed (ensures stability across refreshes for the exact channel)
+    const seed = (channel.handle || channel.title || 'channel').toLowerCase();
     let hash = 0;
-    for (let i = 0; i < seedStr.length; i++) {
-      hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
       hash |= 0;
     }
-    const seedOffset = (Math.abs(hash) % 25) / 10; // 0.0 to 2.4
+    const channelVariance = ((Math.abs(hash) % 18) - 9) / 10; // -0.9% to +0.9%
 
-    // Channels with massive view-to-sub ratios (like VELORA: 612 subs but 210,583 views)
-    // have high algorithmic viral velocity => higher click-through rate (e.g. 8.4% - 10.6%)
-    // Smaller / early stage channels with low views (like BeatNova: 10 subs, 30 views)
-    // have lower baseline CTR (e.g. 4.2% - 5.8%)
-    let baseCtr = 5.2;
-    if (cleanViews > 100000) {
-      baseCtr = 8.8 + seedOffset; // 8.8% - 11.2%
-    } else if (cleanViews > 10000) {
-      baseCtr = 7.2 + seedOffset; // 7.2% - 9.6%
-    } else if (cleanViews > 1000) {
-      baseCtr = 6.0 + seedOffset; // 6.0% - 8.4%
+    // 3. YouTube Algorithmic Ratio Analysis (View Velocity / Audience Depth)
+    // - High ratio (views far exceeding subs): Algorithm is heavily recommending videos on Home & Browse => high CTR
+    // - Low ratio / early stage: Audience is restricted to direct impressions or small niche => standard CTR
+    // - Massive channel (1M+ subs): Broad impressions pull CTR to steady baseline (4.5% - 7.5%)
+    let baseCtr = 5.0;
+
+    if (subs >= 1000000) {
+      // Megachannels (1M - 100M subs): Broad reach across heterogeneous audiences
+      const viewRatio = views / Math.max(subs * 10, 1);
+      baseCtr = 5.2 + Math.min(viewRatio * 1.5, 2.4); // 5.2% - 7.6%
+    } else if (subs >= 100000) {
+      // Large Established Channels (100K - 1M subs)
+      const ratio = views / Math.max(subs * 5, 1);
+      baseCtr = 5.8 + Math.min(ratio * 2.0, 3.2); // 5.8% - 9.0%
+    } else if (subs >= 10000) {
+      // Mid-tier Creators (10K - 100K subs)
+      const ratio = views / Math.max(subs * 3, 1);
+      baseCtr = 6.2 + Math.min(ratio * 2.5, 3.8); // 6.2% - 10.0%
+    } else if (subs >= 1000) {
+      // Micro-Creators (1K - 10K subs)
+      const ratio = views / Math.max(subs * 2, 1);
+      baseCtr = 5.5 + Math.min(ratio * 2.8, 4.2); // 5.5% - 9.7%
     } else {
-      baseCtr = 4.4 + seedOffset; // 4.4% - 6.8%
+      // Early Stage Creators (0 - 1,000 subs)
+      // If views are high relative to subs (e.g. viral Shorts or break-out videos), CTR surges!
+      if (views > 50000) {
+        baseCtr = 8.6; // High viral engagement
+      } else if (views > 5000) {
+        baseCtr = 7.1;
+      } else if (views > 500) {
+        baseCtr = 5.8;
+      } else {
+        baseCtr = 4.2; // New channel baseline
+      }
     }
 
-    return `${baseCtr.toFixed(1)}%`;
+    // Apply unique channel fingerprint variance and clamp to realistic YouTube global bounds (2.5% to 14.5%)
+    const finalCtr = Math.min(14.5, Math.max(2.5, baseCtr + channelVariance));
+    return `${finalCtr.toFixed(1)}%`;
   }, [channel?.title, channel?.handle, channel?.subscribers, channel?.views]);
 
   // 1. Cleanup migration: Permanently remove Dilshod Raximov and mock creators from localStorage & state
