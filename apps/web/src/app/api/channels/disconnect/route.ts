@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
     response.cookies.delete('kanal_user_id');
     response.cookies.delete('tubepilot_google_connected');
     response.cookies.delete('tubepilot_connected_channel');
+    response.cookies.delete('tubepilot_tg_pair_token');
+    response.cookies.delete('tubepilot_tg_paired');
     return response;
   } catch (error: any) {
     console.error('Failed to disconnect channel:', error);

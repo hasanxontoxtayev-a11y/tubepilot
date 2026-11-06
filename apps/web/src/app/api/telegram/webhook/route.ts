@@ -325,12 +325,42 @@ export async function POST(req: NextRequest) {
 
       // Real YouTube Comment Scanner Handler
       if (text.includes('So\'nggi Izohlarni O\'qish') || text.includes('Сканировать последние комментарии') || text.includes('Scan Comments') || text === '/comments') {
-        let targetHandle = 'Beatnova-g3v';
+        let targetHandle: string | null = null;
         for (const [chHandle, boundChatId] of channelChatBindings.entries()) {
           if (boundChatId === chatId) {
             targetHandle = chHandle;
             break;
           }
+        }
+
+        if (!targetHandle) {
+          try {
+            const { prisma } = await import('@kanal/db');
+            const user = await prisma.user.findFirst({
+              where: { telegramChatId: BigInt(chatId) },
+              include: { channel: true },
+            });
+            if (user?.channel?.customUrl) {
+              targetHandle = user.channel.customUrl.replace('@', '');
+            }
+          } catch {}
+        }
+
+        if (!targetHandle) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: currentLang === 'ru'
+                ? '⚠️ Канал еще не привязан к этому Telegram. Пожалуйста, откройте панель управления и нажмите "Telegram Companion Sync".'
+                : currentLang === 'en'
+                ? '⚠️ No YouTube channel is currently bound to this Telegram account. Please open your dashboard and click "Telegram Companion Sync".'
+                : '⚠️ Ushbu Telegramga hali YouTube kanal bog\'lanmagan. Iltimos, boshqaruv paneliga kiring va "Telegram Companion Sync" tugmasini bosing.',
+              parse_mode: 'Markdown',
+            }),
+          });
+          return NextResponse.json({ ok: true });
         }
 
         // Fetch real comments using the live InnerTube engine
@@ -391,12 +421,42 @@ export async function POST(req: NextRequest) {
 
       // Live YouTube Channel Audit Handler
       if (text.includes('Kanal Auditi') || text.includes('Аудит Канала') || text.includes('Channel Audit') || text === '/audit') {
-        let targetHandle = 'Beatnova-g3v';
+        let targetHandle: string | null = null;
         for (const [chHandle, boundChatId] of channelChatBindings.entries()) {
           if (boundChatId === chatId) {
             targetHandle = chHandle;
             break;
           }
+        }
+
+        if (!targetHandle) {
+          try {
+            const { prisma } = await import('@kanal/db');
+            const user = await prisma.user.findFirst({
+              where: { telegramChatId: BigInt(chatId) },
+              include: { channel: true },
+            });
+            if (user?.channel?.customUrl) {
+              targetHandle = user.channel.customUrl.replace('@', '');
+            }
+          } catch {}
+        }
+
+        if (!targetHandle) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: currentLang === 'ru'
+                ? '⚠️ Канал еще не привязан к этому Telegram. Пожалуйста, откройте панель управления и нажмите "Telegram Companion Sync".'
+                : currentLang === 'en'
+                ? '⚠️ No YouTube channel is currently bound to this Telegram account. Please open your dashboard and click "Telegram Companion Sync".'
+                : '⚠️ Ushbu Telegramga hali YouTube kanal bog\'lanmagan. Iltimos, boshqaruv paneliga kiring va "Telegram Companion Sync" tugmasini bosing.',
+              parse_mode: 'Markdown',
+            }),
+          });
+          return NextResponse.json({ ok: true });
         }
 
         try {

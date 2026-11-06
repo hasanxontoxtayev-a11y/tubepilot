@@ -58,16 +58,16 @@ export async function GET(req: NextRequest) {
       // Fallback: If YouTube Data API is not enabled on Google Cloud, use our fast resolver to fetch real channel info
       try {
         const { resolveYouTubeChannel } = await import('@kanal/youtube');
-        // Match user's actual channel handle BeatNova or user name
-        const emailLower = (userInfo.data.email || '').toLowerCase();
-        const query = emailLower.includes('hasanxon') ? '@Beatnova-g3v' : (userInfo.data.name || '@Beatnova-g3v');
+        // Search by user name or connected email username
+        const emailPrefix = (userInfo.data.email || '').split('@')[0];
+        const query = userInfo.data.name || emailPrefix || 'YouTube Creator';
         const res = await resolveYouTubeChannel(query);
         if (res && res.channelTitle) {
           channelTitle = res.channelTitle;
           channelHandle = res.channelHandle;
           channelAvatar = res.avatarUrl || channelAvatar;
-          channelSubs = res.subscribers || '10';
-          channelViews = res.totalViews || '30';
+          channelSubs = res.subscribers || '0';
+          channelViews = res.totalViews || '0';
         }
       } catch (scrapeErr) {
         console.warn('Fallback channel resolution skipped:', scrapeErr);
