@@ -37,6 +37,18 @@ export function TelegramPairingCard({
   useEffect(() => {
     let interval: any = null;
 
+    // Check localStorage fallback for pairing state first
+    try {
+      const savedTg = localStorage.getItem('tubepilot_tg_paired');
+      if (savedTg) {
+        const parsed = JSON.parse(savedTg);
+        if (parsed?.paired) {
+          setPaired(true);
+          if (parsed.username) setUsername(parsed.username);
+        }
+      }
+    } catch {}
+
     const checkStatus = async () => {
       try {
         const queryParam = connectedHandle ? `?handle=${encodeURIComponent(connectedHandle)}` : '';
@@ -44,11 +56,14 @@ export function TelegramPairingCard({
         const data = await res.json();
         if (data.paired) {
           setPaired(true);
-          if (data.telegramUsername) setUsername(data.telegramUsername);
+          if (data.telegramUsername) {
+            setUsername(data.telegramUsername);
+            try {
+              localStorage.setItem('tubepilot_tg_paired', JSON.stringify({ paired: true, username: data.telegramUsername }));
+            } catch {}
+          }
           if (onPairSuccess) onPairSuccess(data.telegramUsername);
           if (interval) clearInterval(interval);
-        } else {
-          setPaired(false);
         }
       } catch (err) {
         // silent fail
@@ -56,14 +71,14 @@ export function TelegramPairingCard({
     };
 
     checkStatus();
-    if (deepLink) {
+    if (deepLink || !paired) {
       interval = setInterval(checkStatus, 3000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [deepLink, paired, onPairSuccess]);
+  }, [deepLink, connectedHandle, paired, onPairSuccess]);
 
   const generateLink = async () => {
     setLoading(true);

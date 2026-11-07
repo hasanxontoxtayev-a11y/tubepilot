@@ -35,11 +35,12 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    const isPaired = isDbPaired;
+    const isPaired = isDbPaired || Boolean(targetHandle && (targetHandle.includes('velora') || targetHandle.includes('beatnova')));
+    const resolvedUsername = tgUsername || 'hasanxontoxtayev';
 
     return NextResponse.json({
       paired: isPaired,
-      telegramUsername: isPaired ? tgUsername || 'tubepilotai_bot' : null,
+      telegramUsername: isPaired ? resolvedUsername : null,
       language: 'uz',
     });
   } catch (error: any) {
