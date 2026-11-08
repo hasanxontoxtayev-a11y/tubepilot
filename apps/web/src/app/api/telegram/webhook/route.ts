@@ -637,36 +637,57 @@ export async function POST(req: NextRequest) {
             const buffer = Buffer.from(arrayBuffer);
 
             const { GeminiService } = await import('@kanal/ai');
-            const evalResult = await GeminiService.evaluateThumbnail(buffer, 'image/jpeg');
+            const evalResult = await GeminiService.evaluateThumbnail(buffer, 'image/jpeg', currentLang);
 
             // Format realistic CTR percentage and actionable advice
             const ctrPercent = ((evalResult.predictedCtrScore * 0.08) + 3.2).toFixed(1); // 4.0% - 11.2%
             const fixesFormatted = (evalResult.actionableFixes || [])
-              .map((fix: string, idx: number) => `${idx + 1}. ${fix}`)
+              .map((fix: string, idx: number) => `• ${fix}`)
               .join('\n');
+
+            const contrastLabel = {
+              POOR: currentLang === 'ru' ? 'Низкая (требует правок)' : currentLang === 'en' ? 'Low (Needs contrast)' : 'Past (Yaxshilash lozim)',
+              AVERAGE: currentLang === 'ru' ? 'Средняя' : currentLang === 'en' ? 'Average' : 'O\'rtacha',
+              EXCELLENT: currentLang === 'ru' ? 'Отличная' : currentLang === 'en' ? 'High / Clear' : 'A\'lo darajada',
+            }[evalResult.contrastRating] || evalResult.contrastRating;
+
+            const readabilityLabel = {
+              POOR: currentLang === 'ru' ? 'Трудночитаемый' : currentLang === 'en' ? 'Hard to read' : 'Qiyin o\'qiladi',
+              AVERAGE: currentLang === 'ru' ? 'Удовлетворительно' : currentLang === 'en' ? 'Fair' : 'O\'rtacha',
+              EXCELLENT: currentLang === 'ru' ? 'Легко читается' : currentLang === 'en' ? 'Crisp & Bold' : 'Aniq va qalin',
+            }[evalResult.readabilityRating] || evalResult.readabilityRating;
 
             const report = {
               uz:
-                `🖼️ **Muqova CTR Diagnostikasi (Gemini 3.8 Vision)**\n\n` +
+                `🖼️ **Muqova CTR Diagnostikasi (Gemini Vision AI)**\n\n` +
                 `📊 **Prognoz qilingan CTR:** \`${ctrPercent}%\` (Bahosi: ${evalResult.predictedCtrScore}/100)\n` +
-                `🎨 **Ranglar kontrasti:** ${evalResult.contrastRating}\n` +
-                `📱 **Mobil ekranda o'qilishi:** ${evalResult.readabilityRating}\n\n` +
-                `💡 **Tavsiyalar va yaxshilash choralari:**\n${fixesFormatted}\n\n` +
-                `🚀 *Ushbu o'zgarishlar muqova bosilish foizini 1.5x – 2x barobarga oshirishga yordam beradi.*`,
+                `🎨 **Ranglar kontrasti:** ${contrastLabel}\n` +
+                (evalResult.contrastFeedback ? `📝 *${evalResult.contrastFeedback}*\n` : '') +
+                `📱 **Mobil ekranda o'qilishi:** ${readabilityLabel}\n` +
+                (evalResult.readabilityFeedback ? `📝 *${evalResult.readabilityFeedback}*\n` : '') +
+                (evalResult.focalPointAnalysis ? `🎯 **Diqqat markazi:** ${evalResult.focalPointAnalysis}\n\n` : '\n') +
+                `💡 **Aynan ushbu muqova uchun aniq tavsiyalar:**\n${fixesFormatted}\n\n` +
+                `🚀 *Ushbu tavsiyalar video tasmada boshqa videolardan ajralib turishini ta'minlaydi.*`,
               ru:
-                `🖼️ **Диагностика CTR Обложки (Gemini 3.8 Vision)**\n\n` +
+                `🖼️ **Диагностика CTR Обложки (Gemini Vision AI)**\n\n` +
                 `📊 **Прогнозируемый CTR:** \`${ctrPercent}%\` (Оценка: ${evalResult.predictedCtrScore}/100)\n` +
-                `🎨 **Контрастность:** ${evalResult.contrastRating}\n` +
-                `📱 **Читаемость на смартфонах:** ${evalResult.readabilityRating}\n\n` +
-                `💡 **Рекомендации по улучшению:**\n${fixesFormatted}\n\n` +
-                `🚀 *Эти правки помогут увеличить количество кликов в 1.5x – 2x раза.*`,
+                `🎨 **Контрастность:** ${contrastLabel}\n` +
+                (evalResult.contrastFeedback ? `📝 *${evalResult.contrastFeedback}*\n` : '') +
+                `📱 **Читаемость на смартфонах:** ${readabilityLabel}\n` +
+                (evalResult.readabilityFeedback ? `📝 *${evalResult.readabilityFeedback}*\n` : '') +
+                (evalResult.focalPointAnalysis ? `🎯 **Фокус внимания:** ${evalResult.focalPointAnalysis}\n\n` : '\n') +
+                `💡 **Персональные рекомендации для этой обложки:**\n${fixesFormatted}\n\n` +
+                `🚀 *Эти правки помогут выделить видео в ленте YouTube и поднять CTR.*`,
               en:
-                `🖼️ **Thumbnail CTR Diagnosis (Gemini 3.8 Vision)**\n\n` +
+                `🖼️ **Thumbnail CTR Diagnosis (Gemini Vision AI)**\n\n` +
                 `📊 **Predicted CTR:** \`${ctrPercent}%\` (Score: ${evalResult.predictedCtrScore}/100)\n` +
-                `🎨 **Visual Contrast:** ${evalResult.contrastRating}\n` +
-                `📱 **Mobile Legibility:** ${evalResult.readabilityRating}\n\n` +
-                `💡 **Actionable Improvements:**\n${fixesFormatted}\n\n` +
-                `🚀 *Implementing these changes can boost your click-through velocity by 1.5x – 2x.*`,
+                `🎨 **Visual Contrast:** ${contrastLabel}\n` +
+                (evalResult.contrastFeedback ? `📝 *${evalResult.contrastFeedback}*\n` : '') +
+                `📱 **Mobile Legibility:** ${readabilityLabel}\n` +
+                (evalResult.readabilityFeedback ? `📝 *${evalResult.readabilityFeedback}*\n` : '') +
+                (evalResult.focalPointAnalysis ? `🎯 **Focal Hook:** ${evalResult.focalPointAnalysis}\n\n` : '\n') +
+                `💡 **Actionable Improvements for this thumbnail:**\n${fixesFormatted}\n\n` +
+                `🚀 *Implementing these changes will help your video stand out in browse features.*`,
             }[currentLang];
 
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
