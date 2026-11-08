@@ -32,20 +32,20 @@ export function PostingHeatmap({
   }, [heatmapMatrix]);
 
   const getColorClass = (value: number) => {
-    if (value > 80) return 'bg-rose-500 text-white';
-    if (value > 60) return 'bg-rose-500/70 text-white';
-    if (value > 40) return 'bg-rose-500/40 text-gray-200';
-    if (value > 20) return 'bg-rose-500/20 text-gray-400';
-    return 'bg-dark-700/60 text-gray-600';
+    if (value > 80) return 'bg-cyan-500 text-white shadow-sm shadow-cyan-400/50';
+    if (value > 60) return 'bg-cyan-600/80 text-white';
+    if (value > 40) return 'bg-blue-600/50 text-cyan-200';
+    if (value > 20) return 'bg-blue-900/30 text-slate-300';
+    return 'bg-slate-800/60 text-slate-500';
   };
 
   const isFree = subscriptionTier === 'FREE';
 
   return (
-    <div className="p-6 rounded-3xl bg-dark-850/90 border border-dark-700 relative overflow-hidden">
+    <div className="p-6 rounded-3xl glass-panel relative overflow-hidden border border-cyan-500/20">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <Clock className="w-5 h-5 text-rose-500" />
+          <Clock className="w-5 h-5 text-cyan-400" />
           <h3 className="text-base font-semibold text-white">Audience Peak Posting Heatmap</h3>
           {isFree && (
             <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 flex items-center gap-1">
@@ -55,8 +55,8 @@ export function PostingHeatmap({
         </div>
         <TelegramHelpButton featureKey="posting_time" />
       </div>
-      <p className="text-xs text-gray-400 mb-5">
-        Analyzed from your channel's 28-day viewer traffic velocity. High-density blocks indicate optimal release windows.
+      <p className="text-xs text-slate-400 mb-5">
+        Analyzed from your channel&apos;s 28-day viewer traffic velocity. High-density blocks indicate optimal release windows.
       </p>
 
       {/* Relative container for heatmap + Free overlay */}
@@ -64,7 +64,7 @@ export function PostingHeatmap({
         {/* 24h Time Labels & Heatmap Grid */}
         <div className={`overflow-x-auto pb-2 transition-all ${isFree ? 'blur-sm select-none pointer-events-none opacity-40' : ''}`}>
           <div className="min-w-[640px]">
-            <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 text-[10px] text-gray-500 text-center">
+            <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 text-[10px] text-slate-400 text-center">
               <span />
               {Array.from({ length: 24 }, (_, i) => (
                 <span key={i}>{i % 3 === 0 ? `${i}h` : ''}</span>
@@ -74,7 +74,7 @@ export function PostingHeatmap({
             {/* Matrix Rows */}
             {DAYS.map((day, dayIdx) => (
               <div key={day} className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1 items-center">
-                <span className="text-xs text-gray-400 font-medium">{day}</span>
+                <span className="text-xs text-slate-400 font-medium">{day}</span>
                 {matrix[dayIdx].map((val, hourIdx) => (
                   <div
                     key={hourIdx}
@@ -83,7 +83,7 @@ export function PostingHeatmap({
                       val
                     )}`}
                   >
-                    {val > 80 ? '🔥' : ''}
+                    {val > 80 ? '⚡' : ''}
                   </div>
                 ))}
               </div>
@@ -93,12 +93,12 @@ export function PostingHeatmap({
 
         {/* Free Overlay Gate */}
         {isFree && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-dark-950/70 backdrop-blur-[2px] rounded-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-600 flex items-center justify-center text-white mb-3 shadow-lg shadow-rose-950/50">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-slate-950/80 backdrop-blur-[3px] rounded-2xl border border-cyan-500/20">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center text-white mb-3 shadow-lg shadow-cyan-950/50">
               <Lock className="w-6 h-6" />
             </div>
             <h4 className="text-base font-extrabold text-white">Video Yuklash Uchun Eng Optimal Vaqt Xaritasi</h4>
-            <p className="text-xs text-gray-400 max-w-md mt-1 mb-4">
+            <p className="text-xs text-slate-300 max-w-md mt-1 mb-4">
               Auditoriyangiz eng faol bo&apos;lgan soatlarni ko&apos;rish va dastlabki 2 soatda maksimal tomosha yig&apos;ish uchun PRO tarifiga o&apos;ting.
             </p>
             <button
@@ -113,14 +113,14 @@ export function PostingHeatmap({
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-dark-700 mt-2">
+      <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-800 mt-2">
         <span>Low Activity</span>
         <div className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-dark-700/60" />
-          <span className="w-3 h-3 rounded bg-rose-500/20" />
-          <span className="w-3 h-3 rounded bg-rose-500/40" />
-          <span className="w-3 h-3 rounded bg-rose-500/70" />
-          <span className="w-3 h-3 rounded bg-rose-500" />
+          <span className="w-3 h-3 rounded bg-slate-800/60" />
+          <span className="w-3 h-3 rounded bg-blue-900/30" />
+          <span className="w-3 h-3 rounded bg-blue-600/50" />
+          <span className="w-3 h-3 rounded bg-cyan-600/80" />
+          <span className="w-3 h-3 rounded bg-cyan-500" />
         </div>
         <span>Peak Prime Time</span>
       </div>

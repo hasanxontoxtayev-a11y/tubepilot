@@ -367,7 +367,7 @@ export function ThumbnailStudio({
 
             {/* Concrete Actionable Fixes */}
             <div className="space-y-1.5">
-              <h5 className="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+              <h5 className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5" />
                 <span>Actionable Gemini Recommendations:</span>
               </h5>
@@ -375,9 +375,9 @@ export function ThumbnailStudio({
                 {evaluation.actionableFixes.map((fix, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-2 text-xs text-gray-300 bg-dark-900/60 px-3 py-1.5 rounded-lg border border-dark-800"
+                    className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
                     <span>{fix}</span>
                   </div>
                 ))}

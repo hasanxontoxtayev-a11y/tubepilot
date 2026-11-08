@@ -320,20 +320,20 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
                   </p>
 
                   {/* AI Draft Response & Quick Language Switcher */}
-                  <div className="pl-3.5 border-l-2 border-rose-500/80 space-y-2">
+                  <div className="pl-3.5 border-l-2 border-cyan-500/80 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-rose-400 font-bold flex items-center gap-1.5 text-[11px]">
+                      <span className="text-cyan-300 font-bold flex items-center gap-1.5 text-[11px]">
                         <Sparkles className="w-3.5 h-3.5" />
                         AI Agent Contextual Draft
                       </span>
 
                       {/* Multilingual Regeneration Buttons */}
                       <div className="flex items-center gap-1 text-[10px]">
-                        <span className="text-gray-500 font-medium">Re-draft:</span>
+                        <span className="text-slate-400 font-medium">Re-draft:</span>
                         <button
                           onClick={() => generateReply(comment, 'uz')}
                           disabled={generatingId !== null}
-                          className="px-1.5 py-0.5 rounded bg-dark-800 hover:bg-dark-750 text-gray-300 hover:text-white border border-dark-700 font-bold"
+                          className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold"
                           title="Generate reply in Uzbek"
                         >
                           {generatingId === `${comment.id}_uz` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : '🇺🇿 UZ'}
@@ -341,7 +341,7 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
                         <button
                           onClick={() => generateReply(comment, 'ru')}
                           disabled={generatingId !== null}
-                          className="px-1.5 py-0.5 rounded bg-dark-800 hover:bg-dark-750 text-gray-300 hover:text-white border border-dark-700 font-bold"
+                          className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold"
                           title="Generate reply in Russian"
                         >
                           {generatingId === `${comment.id}_ru` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : '🇷🇺 RU'}
@@ -349,7 +349,7 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
                         <button
                           onClick={() => generateReply(comment, 'en')}
                           disabled={generatingId !== null}
-                          className="px-1.5 py-0.5 rounded bg-dark-800 hover:bg-dark-750 text-gray-300 hover:text-white border border-dark-700 font-bold"
+                          className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold"
                           title="Generate reply in English"
                         >
                           {generatingId === `${comment.id}_en` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : '🇬🇧 EN'}
@@ -362,24 +362,24 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
                         <textarea
                           value={editText}
                           onChange={(e) => setEditText(e.target.value)}
-                          className="w-full text-xs bg-dark-800 border border-dark-600 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500"
+                          className="w-full text-xs bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-400"
                           rows={3}
                         />
                         <button
                           onClick={() => saveEdit(comment.id)}
-                          className="px-3 py-1 text-xs rounded-lg bg-rose-600 text-white font-bold"
+                          className="px-3 py-1 text-xs rounded-lg bg-cyan-600 text-white font-bold"
                         >
                           Save
                         </button>
                       </div>
                     ) : (
-                      <p className="text-xs text-white leading-relaxed">{comment.aiDraftReply}</p>
+                      <p className="text-xs text-slate-200 leading-relaxed">{comment.aiDraftReply}</p>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between pt-2 border-t border-dark-800">
-                    <span className="text-[10px] text-gray-500">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                    <span className="text-[10px] text-slate-500">
                       Syncs with @tubepilotai_bot for 1-tap mobile push
                     </span>
 
@@ -392,21 +392,21 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
                         <>
                           <button
                             onClick={() => startEdit(comment)}
-                            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-dark-800 hover:bg-dark-750 text-gray-300 border border-dark-700 transition-all font-semibold"
+                            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all font-semibold"
                           >
                             <Edit2 className="w-3 h-3" />
                             {t('edit')}
                           </button>
                           <button
                             onClick={() => handleDiscard(comment.id)}
-                            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all font-semibold"
+                            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 transition-all font-semibold"
                           >
                             <X className="w-3 h-3" />
                             {t('discard')}
                           </button>
                           <button
                             onClick={() => handleApprove(comment.id, comment.aiDraftReply || '')}
-                            className="flex items-center gap-1.5 px-3.5 py-1 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold transition-all shadow-md shadow-rose-900/30"
+                            className="flex items-center gap-1.5 px-3.5 py-1 text-xs rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-cyan-500 hover:to-blue-500 text-white font-bold transition-all shadow-md shadow-cyan-950/40"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>{t('approve')}</span>
