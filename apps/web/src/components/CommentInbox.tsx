@@ -208,10 +208,10 @@ export function CommentInbox({ connectedChannelTitle = 'YouTube Kanali', connect
             <button
               onClick={syncChannelComments}
               disabled={isSyncing}
-              className="p-1.5 px-2.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-300 hover:text-white border border-dark-600 transition-all text-xs flex items-center gap-1.5 font-semibold"
+              className="p-1.5 px-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 hover:text-white border border-cyan-500/30 transition-all text-xs flex items-center gap-1.5 font-semibold shadow-sm"
               title="YouTube kanaldan so'nggi izohlarni sinxronlash"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-malla-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isSyncing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{isSyncing ? 'Yuklanmoqda...' : 'Izohlarni Yangilash'}</span>
             </button>
             <TelegramHelpButton featureKey="comment_copilot" label="Telegram Approvals" />

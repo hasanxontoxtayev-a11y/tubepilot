@@ -178,7 +178,7 @@ export function ChannelAudit({
               }}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1.5 ${
                 showCompetitorSpy
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-cyan-400/50 shadow-md shadow-malla-950/40'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-cyan-400/50 shadow-md shadow-cyan-950/40'
                   : 'bg-dark-900 text-slate-300 hover:text-white border-slate-700/80 hover:border-cyan-400/40'
               }`}
             >
@@ -217,7 +217,7 @@ export function ChannelAudit({
             <button
               type="submit"
               disabled={loading}
-              className="absolute right-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-500 text-white text-xs font-black transition-all shadow-md shadow-malla-950/40 disabled:opacity-50 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+              className="absolute right-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-500 text-white text-xs font-black transition-all shadow-md shadow-cyan-950/40 disabled:opacity-50 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
               <span>Audit</span>
@@ -236,7 +236,7 @@ export function ChannelAudit({
                 onClick={() => handlePreset(preset)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                   query === preset
-                    ? 'bg-cyan-500/25 text-malla-200 border border-cyan-400/40 shadow-sm'
+                    ? 'bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 shadow-sm'
                     : 'bg-dark-900 text-slate-400 hover:text-slate-200 border border-slate-700/80'
                 }`}
               >

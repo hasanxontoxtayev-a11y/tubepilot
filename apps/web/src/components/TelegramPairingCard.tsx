@@ -122,17 +122,17 @@ export function TelegramPairingCard({
   };
 
   return (
-    <div className="p-6 sm:p-7 rounded-3xl glass-panel relative overflow-hidden shadow-xl border border-malla-500/25 group">
-      <div className="absolute top-0 right-0 w-80 h-80 bg-malla-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-malla-500/20 transition-all duration-700" />
+    <div className="p-6 sm:p-7 rounded-3xl glass-panel relative overflow-hidden shadow-xl border border-cyan-500/30 group">
+      <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700" />
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 relative z-10">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-malla-600 via-amber-600 to-malla-400 text-white flex items-center justify-center border border-malla-400/40 shadow-xl shadow-malla-950/50">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 text-white flex items-center justify-center border border-cyan-400/40 shadow-xl shadow-cyan-950/60">
             <Send className="w-6 h-6 text-white" />
           </div>
           <div>
             <h4 className="text-base font-black text-white flex items-center gap-2">
               Telegram Companion Sync
-              <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-0.5 rounded-full bg-malla-500/20 text-cyan-400 border border-malla-400/30">
+              <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
                 1-Click Auth
               </span>
             </h4>

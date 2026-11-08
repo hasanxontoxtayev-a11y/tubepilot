@@ -710,15 +710,15 @@ function DashboardContent() {
 
           {/* Card 4: AI Predicted CTR */}
           <div className="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/25 transition-all" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/25 transition-all" />
             <div className="flex items-center justify-between mb-3 relative z-10">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{tDash('avgCtr')}</span>
-              <div className="w-10 h-10 rounded-2xl bg-pink-500/15 text-pink-300 flex items-center justify-center border border-pink-400/30 group-hover:scale-110 transition-transform">
-                <Sparkles className="w-5 h-5 text-pink-300" />
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 text-cyan-300 flex items-center justify-center border border-cyan-400/30 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-5 h-5 text-cyan-300" />
               </div>
             </div>
             <div className="relative z-10 flex items-baseline justify-between">
-              <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-amber-300 tracking-tight">
+              <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-blue-400 tracking-tight">
                 {isChannelConnected ? calculatedCtr : '—'}
               </h3>
               <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
@@ -786,16 +786,16 @@ function DashboardContent() {
         />
 
         {/* Global Verification Footer */}
-        <footer className="mt-16 pt-8 pb-12 border-t border-dark-750 text-center text-xs text-gray-500 space-y-3">
-          <div className="flex flex-wrap justify-center gap-6 text-gray-400">
-            <Link href="/privacy" className="hover:text-rose-400 transition-colors">
+        <footer className="mt-16 pt-8 pb-12 border-t border-slate-800 text-center text-xs text-slate-400 space-y-3">
+          <div className="flex flex-wrap justify-center gap-6 text-slate-400">
+            <Link href="/privacy" className="hover:text-cyan-400 transition-colors">
               Privacy Policy
             </Link>
             <a
               href="https://www.youtube.com/t/terms"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-rose-400 transition-colors"
+              className="hover:text-cyan-400 transition-colors"
             >
               YouTube Terms of Service
             </a>
@@ -803,18 +803,18 @@ function DashboardContent() {
               href="https://policies.google.com/privacy"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-rose-400 transition-colors"
+              className="hover:text-cyan-400 transition-colors"
             >
               Google Privacy Policy
             </a>
             <a
               href="mailto:hasanxontoxtayev@gmail.com"
-              className="hover:text-rose-400 transition-colors"
+              className="hover:text-cyan-400 transition-colors"
             >
               Contact Support
             </a>
           </div>
-          <p>© 2026 TubePilot AI (tubepilotpro.com). All rights reserved.</p>
+          <p className="text-slate-500">© 2026 TubePilot AI (tubepilotpro.com). All rights reserved.</p>
         </footer>
       </main>
 

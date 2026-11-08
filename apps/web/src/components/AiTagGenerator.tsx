@@ -126,7 +126,7 @@ export function AiTagGenerator({
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-dark-750">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-xl shadow-blue-950/60 animate-float-slow">
-            <Hash className="w-6 h-6 text-malla-100" />
+            <Hash className="w-6 h-6 text-cyan-200" />
           </div>
           <div>
             <div className="flex items-center gap-2">

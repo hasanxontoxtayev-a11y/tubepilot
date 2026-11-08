@@ -189,8 +189,8 @@ export function ThumbnailStudio({
                   Multimodal Gemini Vision
                 </span>
                 {isFree && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-750 text-gray-300 border border-dark-650 flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-malla-400" />
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-cyan-400" />
                     {evaluatedCount}/{FREE_UPLOAD_LIMIT} bepul
                   </span>
                 )}

@@ -104,7 +104,7 @@ export function PostingHeatmap({
             <button
               type="button"
               onClick={() => onUpgradeClick?.("Audience Peak Posting Heatmap (Eng Optimal Vaqt)")}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-malla-600 to-amber-600 hover:from-cyan-500 hover:to-amber-500 text-white font-extrabold text-xs shadow-xl shadow-malla-950/50 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-xl shadow-cyan-950/50 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
             >
               <Sparkles className="w-4 h-4" />
               <span>PRO Tarifga O&apos;tish ($19)</span>
