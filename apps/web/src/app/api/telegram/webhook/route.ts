@@ -346,6 +346,11 @@ export async function POST(req: NextRequest) {
           } catch {}
         }
 
+        // Global Owner/Creator fallback for seamless experience
+        if (!targetHandle && (chatId === 8471212270 || String(chatId) === '8471212270')) {
+          targetHandle = 'velora-p5n';
+        }
+
         if (!targetHandle) {
           await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -440,6 +445,11 @@ export async function POST(req: NextRequest) {
               targetHandle = user.channel.customUrl.replace('@', '');
             }
           } catch {}
+        }
+
+        // Global Owner/Creator fallback for seamless experience
+        if (!targetHandle && (chatId === 8471212270 || String(chatId) === '8471212270')) {
+          targetHandle = 'velora-p5n';
         }
 
         if (!targetHandle) {
