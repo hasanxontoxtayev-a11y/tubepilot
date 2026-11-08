@@ -23,7 +23,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/en/dashboard',
+        destination: '/uz',
         permanent: false,
       },
     ];
