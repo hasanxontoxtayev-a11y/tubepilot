@@ -113,7 +113,7 @@ Analyze this video thumbnail cover with deep visual scrutiny:
     commentText: string,
     channelNicheOrTone: string = "Friendly, authentic, encouraging, and engaging creator tone"
   ): Promise<CommentDraftResult> {
-    const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
     const prompt = `You are the creator's AI copilot for answering YouTube audience comments.
 Task:

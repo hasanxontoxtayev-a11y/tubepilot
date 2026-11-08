@@ -3,28 +3,11 @@ import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 
 export function getDatabaseUrl(): string {
-  const envUrl = process.env.DATABASE_URL;
-  if (envUrl && !envUrl.includes('postgres') && !envUrl.startsWith('file:./')) {
+  const envUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
+  if (envUrl && envUrl.includes('postgres')) {
     return envUrl;
   }
-
-  const candidates = [
-    path.resolve(process.cwd(), 'packages/db/prisma/dev.db'),
-    path.resolve(process.cwd(), '../../packages/db/prisma/dev.db'),
-    path.resolve(process.cwd(), '../packages/db/prisma/dev.db'),
-    path.resolve(__dirname, '../prisma/dev.db'),
-    'C:/Users/Dell/Desktop/kanal/packages/db/prisma/dev.db',
-  ];
-
-  for (const c of candidates) {
-    try {
-      if (fs.existsSync(c)) {
-        return `file:${c.replace(/\\/g, '/')}`;
-      }
-    } catch {}
-  }
-
-  return 'file:C:/Users/Dell/Desktop/kanal/packages/db/prisma/dev.db';
+  return 'postgresql://neondb_owner:npg_1EI8YTzrOwoq@ep-dry-art-bck2oh7q-pooler.c-16.us-east-1.aws.neon.tech/neondb?sslmode=require';
 }
 
 const dbUrl = getDatabaseUrl();
