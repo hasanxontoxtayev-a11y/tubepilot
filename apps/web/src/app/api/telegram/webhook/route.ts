@@ -682,7 +682,20 @@ export async function POST(req: NextRequest) {
           }
         } catch (visionErr: any) {
           console.warn('Vision processing error in telegram bot:', visionErr);
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: currentLang === 'ru'
+                ? '⚠️ Не удалось полностью обработать изображение. Пожалуйста, отправьте обложку в формате JPG или PNG еще раз.'
+                : currentLang === 'en'
+                ? '⚠️ Could not analyze image. Please send your thumbnail in JPG or PNG format again.'
+                : '⚠️ Muqovani tahlil qilishda vaqtinchalik xatolik yuz berdi. Iltimos, JPG yoki PNG formatidagi rasmni qayta yuboring.',
+            }),
+          });
         }
+        return NextResponse.json({ ok: true });
       }
 
       // If user typed a general question about YouTube or growth: Answer with Gemini 3.8!
