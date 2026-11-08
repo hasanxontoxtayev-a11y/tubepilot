@@ -189,14 +189,9 @@ function DashboardContent() {
     } catch {}
   }, []);
 
-  // 2. Auto-open 1-minute video modal on first visit (localStorage check)
+  // 2. Auto-open 1-minute video modal on first visit (Disabled per user request)
   useEffect(() => {
-    try {
-      const tourSeen = localStorage.getItem('tubepilot_tour_seen');
-      if (!tourSeen) {
-        setShowOnboarding(true);
-      }
-    } catch {}
+    // Disabled auto popup tour modal
   }, []);
 
   // 3. Restore or sync channel state from SQLite DB & URL parameters (Clean initial state)
