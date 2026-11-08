@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --background: #0f1117;
-  --foreground: #f3f4f6;
-  --malla-primary: #d49a6a;
-  --malla-dark: #785338;
-  --malla-deep: #2b1e14;
-  --slate-dark: #12151c;
-  --slate-card: #181c26;
-  --slate-border: #282f40;
+  --background: #080a11;
+  --foreground: #f8fafc;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+  --accent-cyan: #06b6d4;
+  --slate-dark: #0d111a;
+  --slate-card: #121826;
+  --slate-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -19,62 +19,62 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(at 15% 10%, rgba(212, 154, 106, 0.16) 0px, transparent 45%),
-    radial-gradient(at 85% 90%, rgba(120, 83, 56, 0.22) 0px, transparent 50%),
-    radial-gradient(at 50% 40%, rgba(40, 47, 64, 0.5) 0px, transparent 65%),
-    radial-gradient(at 90% 15%, rgba(166, 115, 78, 0.14) 0px, transparent 40%);
+    radial-gradient(at 15% 10%, rgba(99, 102, 241, 0.18) 0px, transparent 45%),
+    radial-gradient(at 85% 90%, rgba(168, 85, 247, 0.16) 0px, transparent 50%),
+    radial-gradient(at 50% 40%, rgba(6, 182, 212, 0.12) 0px, transparent 60%),
+    radial-gradient(at 90% 15%, rgba(236, 72, 153, 0.14) 0px, transparent 40%);
   background-attachment: fixed;
 }
 
-/* Glassmorphic Luxury Malla & Grey Effects */
+/* FinTech Glassmorphic Cards & Neon Glows */
 .glass-panel {
-  background: rgba(22, 26, 35, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(212, 154, 106, 0.18);
-  box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(212, 154, 106, 0.05);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 21, 34, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(99, 102, 241, 0.08);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
-  border-color: rgba(212, 154, 106, 0.35);
-  box-shadow: 0 16px 40px -5px rgba(0, 0, 0, 0.6), 0 0 25px 2px rgba(212, 154, 106, 0.12);
+  transform: translateY(-4px) scale(1.008);
+  border-color: rgba(168, 85, 247, 0.45);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px 4px rgba(168, 85, 247, 0.22);
 }
 
 .glass-panel-glow {
-  background: linear-gradient(135deg, rgba(43, 30, 20, 0.88) 0%, rgba(24, 28, 38, 0.92) 100%);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(212, 154, 106, 0.38);
-  box-shadow: 0 20px 60px -10px rgba(166, 115, 78, 0.3), inset 0 1px 0 rgba(245, 220, 184, 0.15);
+  background: linear-gradient(135deg, rgba(20, 26, 43, 0.88) 0%, rgba(13, 17, 28, 0.94) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 25px 70px -12px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.text-gradient-malla {
-  background: linear-gradient(135deg, #fcead2 0%, #e6b98d 35%, #d49a6a 70%, #a6734e 100%);
+.text-gradient-fintech {
+  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 35%, #a855f7 70%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-slate {
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 40%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Custom animated scrollbar with Malla accent */
+/* Smooth Scrollbar with Indigo Glow */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f1117;
+  background: #080a11;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2b3345;
+  background: #252e48;
   border-radius: 9999px;
-  border: 2px solid #0f1117;
+  border: 2px solid #080a11;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a6734e;
+  background: #6366f1;
 }
-
