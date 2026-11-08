@@ -567,15 +567,15 @@ function DashboardContent() {
             </div>
           </div>
         ) : (
-          <div className="p-8 sm:p-12 rounded-[32px] bg-gradient-to-r from-indigo-950/70 via-purple-950/50 to-[#0c0f17] border border-white/20 shadow-2xl shadow-indigo-950/80 relative overflow-hidden group backdrop-blur-2xl">
-            {/* Ambient FinTech radial glows */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-indigo-500/25 via-purple-500/15 to-transparent rounded-full blur-3xl pointer-events-none group-hover:scale-115 transition-transform duration-700" />
-            <div className="absolute -bottom-10 -left-10 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="p-8 sm:p-12 rounded-[32px] bg-gradient-to-r from-blue-950/70 via-slate-900 to-[#080d1a] border border-cyan-500/30 shadow-2xl shadow-cyan-950/60 relative overflow-hidden group backdrop-blur-2xl">
+            {/* Ambient Cyan & Blue FinTech radial glows */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-cyan-500/20 via-blue-600/15 to-transparent rounded-full blur-3xl pointer-events-none group-hover:scale-115 transition-transform duration-700" />
+            <div className="absolute -bottom-10 -left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-red-600 via-rose-600 to-indigo-600 p-0.5 shadow-2xl shadow-red-950/80 flex-shrink-0 group-hover:rotate-6 group-hover:scale-105 transition-all duration-500">
-                  <div className="w-full h-full bg-[#0c0f17] rounded-[22px] flex items-center justify-center text-white">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-red-600 via-rose-600 to-red-500 p-0.5 shadow-2xl shadow-red-950/80 flex-shrink-0 group-hover:rotate-6 group-hover:scale-105 transition-all duration-500">
+                  <div className="w-full h-full bg-[#080d1a] rounded-[22px] flex items-center justify-center text-white">
                     <Youtube className="w-10 h-10 text-red-500 fill-red-500 animate-pulse" />
                   </div>
                 </div>
@@ -585,7 +585,7 @@ function DashboardContent() {
                     <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                       YouTube Kanalingizni Bog&apos;lang
                     </h3>
-                    <span className="px-3.5 py-1 rounded-full bg-gradient-to-r from-red-500/20 to-indigo-500/20 text-indigo-300 font-extrabold text-[11px] border border-indigo-400/40 uppercase tracking-widest shadow-sm">
+                    <span className="px-3.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 font-extrabold text-[11px] border border-cyan-400/40 uppercase tracking-widest shadow-sm">
                       1-Bosishda
                     </span>
                   </div>
@@ -598,7 +598,7 @@ function DashboardContent() {
                       Google Verified API
                     </span>
                     <span>•</span>
-                    <span className="flex items-center gap-1.5 text-purple-300 font-bold">
+                    <span className="flex items-center gap-1.5 text-cyan-300 font-bold">
                       <Sparkles className="w-4 h-4" />
                       Gemini Vision Tahlili
                     </span>
@@ -610,7 +610,7 @@ function DashboardContent() {
                 onClick={() => setShowConnectModal(true)}
                 className="w-full lg:w-auto relative group overflow-hidden px-8 py-4 rounded-2xl font-black text-sm sm:text-base text-white shadow-2xl shadow-red-600/50 transition-all hover:scale-105 active:scale-95 border border-white/30 flex items-center justify-center gap-3 flex-shrink-0"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-red-600 via-rose-600 to-indigo-600 group-hover:from-red-500 group-hover:via-rose-500 group-hover:to-indigo-500 transition-all" />
+                <span className="absolute inset-0 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 group-hover:from-red-500 group-hover:to-rose-500 transition-all" />
                 <span className="relative flex items-center gap-2.5">
                   <Youtube className="w-5 h-5 fill-white" />
                   <span>+ YouTube Kanalni Ulash</span>
@@ -624,17 +624,17 @@ function DashboardContent() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Card 1: Channel Overview */}
           <div className="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/25 transition-all" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/25 transition-all" />
             <div className="flex items-center gap-4 relative z-10">
               {isChannelConnected && channel ? (
                 <img
                   src={channel.avatar || FALLBACK_AVATAR}
                   alt={channel.title || 'Channel Avatar'}
-                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-indigo-400 shadow-lg shadow-indigo-950/50 flex-shrink-0 group-hover:scale-110 transition-transform"
+                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-cyan-400 shadow-lg shadow-cyan-950/50 flex-shrink-0 group-hover:scale-110 transition-transform"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600/30 via-purple-600/20 to-slate-700/30 border border-white/10 flex items-center justify-center text-indigo-300 flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
-                  <Youtube className="w-7 h-7 text-indigo-400" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-600/30 via-blue-600/20 to-slate-700/30 border border-white/10 flex items-center justify-center text-cyan-300 flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
+                  <Youtube className="w-7 h-7 text-cyan-400" />
                 </div>
               )}
               <div className="overflow-hidden">

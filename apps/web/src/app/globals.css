@@ -3,14 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --background: #080a11;
+  --background: #06080e;
   --foreground: #f8fafc;
-  --accent-indigo: #6366f1;
-  --accent-purple: #a855f7;
   --accent-cyan: #06b6d4;
-  --slate-dark: #0d111a;
-  --slate-card: #121826;
-  --slate-border: rgba(255, 255, 255, 0.1);
+  --accent-blue: #3b82f6;
+  --accent-gold: #f59e0b;
+  --accent-red: #ef4444;
+  --slate-dark: #090d16;
+  --slate-card: #0e1422;
+  --slate-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
@@ -19,62 +20,62 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(at 15% 10%, rgba(99, 102, 241, 0.18) 0px, transparent 45%),
-    radial-gradient(at 85% 90%, rgba(168, 85, 247, 0.16) 0px, transparent 50%),
-    radial-gradient(at 50% 40%, rgba(6, 182, 212, 0.12) 0px, transparent 60%),
-    radial-gradient(at 90% 15%, rgba(236, 72, 153, 0.14) 0px, transparent 40%);
+    radial-gradient(at 15% 10%, rgba(59, 130, 246, 0.16) 0px, transparent 45%),
+    radial-gradient(at 85% 90%, rgba(6, 182, 212, 0.14) 0px, transparent 50%),
+    radial-gradient(at 50% 40%, rgba(14, 165, 233, 0.10) 0px, transparent 60%),
+    radial-gradient(at 90% 15%, rgba(239, 68, 68, 0.12) 0px, transparent 40%);
   background-attachment: fixed;
 }
 
-/* FinTech Glassmorphic Cards & Neon Glows */
+/* YouTube & FinTech Clean Glassmorphic Cards */
 .glass-panel {
-  background: rgba(15, 21, 34, 0.75);
+  background: rgba(14, 20, 34, 0.82);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.65), 0 0 25px 0 rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.75), 0 0 20px 0 rgba(6, 182, 212, 0.06);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
   transform: translateY(-4px) scale(1.008);
-  border-color: rgba(168, 85, 247, 0.45);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 35px 4px rgba(168, 85, 247, 0.22);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 22px 55px -10px rgba(0, 0, 0, 0.85), 0 0 30px 3px rgba(6, 182, 212, 0.2);
 }
 
 .glass-panel-glow {
-  background: linear-gradient(135deg, rgba(20, 26, 43, 0.88) 0%, rgba(13, 17, 28, 0.94) 100%);
+  background: linear-gradient(135deg, rgba(16, 24, 42, 0.90) 0%, rgba(10, 15, 26, 0.96) 100%);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  box-shadow: 0 25px 70px -12px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.text-gradient-fintech {
-  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 35%, #a855f7 70%, #ec4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  box-shadow: 0 25px 70px -12px rgba(6, 182, 212, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .text-gradient-cyan {
-  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 40%, #06b6d4 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 35%, #06b6d4 70%, #0284c7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Smooth Scrollbar with Indigo Glow */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 40%, #eab308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Electric Cyan Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #080a11;
+  background: #06080e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252e48;
+  background: #1e293b;
   border-radius: 9999px;
-  border: 2px solid #080a11;
+  border: 2px solid #06080e;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
+  background: #06b6d4;
 }

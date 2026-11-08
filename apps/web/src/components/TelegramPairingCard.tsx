@@ -132,7 +132,7 @@ export function TelegramPairingCard({
           <div>
             <h4 className="text-base font-black text-white flex items-center gap-2">
               Telegram Companion Sync
-              <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-0.5 rounded-full bg-malla-500/20 text-malla-300 border border-malla-400/30">
+              <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-0.5 rounded-full bg-malla-500/20 text-cyan-400 border border-malla-400/30">
                 1-Click Auth
               </span>
             </h4>
@@ -146,7 +146,7 @@ export function TelegramPairingCard({
             Ulangan: {username ? `@${username}` : '@tubepilotai_bot'}
           </span>
         ) : (
-          <span className="px-3 py-1 text-xs font-bold rounded-full bg-malla-500/15 text-malla-300 border border-malla-400/30">
+          <span className="px-3 py-1 text-xs font-bold rounded-full bg-slate-700/40 text-slate-400 border border-slate-600/40">
             Ulanmagan
           </span>
         )}
@@ -157,12 +157,12 @@ export function TelegramPairingCard({
           {!deepLink ? (
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <p className="text-xs text-slate-300 max-w-md">
-                Tugmani bosing va Telegramdagi <span className="text-malla-300 font-bold">@tubepilotai_bot</span> bilan YouTube kanalingizni 1 soniyada bog&apos;lang.
+                Tugmani bosing va Telegramdagi <span className="text-cyan-400 font-bold">@tubepilotai_bot</span> bilan YouTube kanalingizni 1 soniyada bog&apos;lang.
               </p>
               <button
                 onClick={generateLink}
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-malla-600 via-amber-600 to-malla-500 hover:from-malla-500 hover:to-amber-500 text-white text-xs sm:text-sm font-extrabold transition-all shadow-xl shadow-malla-950/60 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs sm:text-sm font-extrabold transition-all shadow-xl shadow-blue-950/60 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-white" />}
                 1-Bosishda Bog&apos;lash
@@ -188,7 +188,7 @@ export function TelegramPairingCard({
                       className="w-32 h-32 rounded object-contain"
                     />
                   </div>
-                  <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold text-malla-300">
+                  <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold text-cyan-400">
                     <QrCode className="w-3.5 h-3.5" />
                     <span>Kamera orqali skanerlang</span>
                   </div>
@@ -212,7 +212,7 @@ export function TelegramPairingCard({
                       href={deepLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-malla-600 via-amber-600 to-malla-500 hover:from-malla-500 hover:to-amber-500 text-white text-xs font-black transition-all shadow-xl shadow-malla-950/60 hover:scale-[1.02] active:scale-[0.98]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-black transition-all shadow-xl shadow-blue-950/60 hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <ExternalLink className="w-4 h-4" />
                       <span>Telegramda Ochish (@tubepilotai_bot)</span>
@@ -220,9 +220,9 @@ export function TelegramPairingCard({
 
                     <button
                       onClick={copyToClipboard}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-750 text-slate-200 border border-slate-700 hover:border-malla-500/30 text-xs font-semibold transition-all"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-750 text-slate-200 border border-slate-700 hover:border-blue-500/30 text-xs font-semibold transition-all"
                     >
-                      <Copy className="w-3.5 h-3.5 text-malla-400" />
+                      <Copy className="w-3.5 h-3.5 text-cyan-400" />
                       <span>{copied ? 'Nusxalandi!' : 'Linkni nusxalash'}</span>
                     </button>
 
