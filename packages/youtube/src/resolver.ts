@@ -71,6 +71,13 @@ export interface ChannelAuditData {
     issue: string;
     thumbnail: string;
   }>;
+  recentVideos?: Array<{
+    id: string;
+    title: string;
+    views: string;
+    timeAgo: string;
+    thumbnail: string;
+  }>;
   aiRecommendations: string[];
 }
 
@@ -653,6 +660,13 @@ export async function resolveYouTubeChannel(rawQuery: string): Promise<ChannelAu
       checklist,
       topVideos,
       underperformingVideos,
+      recentVideos: parsedVideos.slice(0, 8).map(v => ({
+        id: v.id,
+        title: v.title,
+        views: v.views,
+        timeAgo: v.timeAgo,
+        thumbnail: v.thumbnail,
+      })),
       aiRecommendations,
       vidiqMetrics: (() => {
         const fullChannelText = (

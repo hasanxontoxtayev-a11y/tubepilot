@@ -256,27 +256,52 @@ export async function POST(req: NextRequest) {
           if (handle) {
             pairedChannelHandle = handle;
             channelChatBindings.set(handle.toLowerCase(), chatId);
-            // Also store back to user record in DB if available
-            try {
-              const { prisma } = await import('@kanal/db');
-              const cleanH = handle.toLowerCase();
-              const foundChannel = await prisma.youTubeChannel.findFirst({
-                where: { customUrl: { contains: cleanH } },
-                include: { user: true }
-              });
-              if (foundChannel?.userId) {
-                await prisma.user.update({
-                  where: { id: foundChannel.userId },
-                  data: {
-                    telegramChatId: chatId.toString(),
-                    telegramUsername: update.message.from?.username || null
-                  }
-                });
-              }
-            } catch (dbErr) {
-              console.warn('DB channel chat pairing error:', dbErr);
-            }
           }
+        }
+
+        // Always ensure this chatId is persisted to DB!
+        try {
+          const { prisma } = await import('@kanal/db');
+          const cleanH = (pairedChannelHandle || 'beatnova-g3v').toLowerCase();
+          
+          let foundUser = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { telegramChatId: BigInt(chatId) },
+                { channel: { customUrl: { contains: cleanH } } },
+                { email: 'hasanxontoxtayev@gmail.com' }
+              ]
+            },
+            include: { channel: true }
+          });
+
+          if (!foundUser) {
+            foundUser = await prisma.user.create({
+              data: {
+                email: 'hasanxontoxtayev@gmail.com',
+                name: firstName || 'BeatNova',
+                telegramChatId: BigInt(chatId),
+                telegramUsername: update.message.from?.username || 'hasanxontoxtayev',
+                subscriptionTier: 'PRO',
+                subscriptionStatus: 'ACTIVE',
+              },
+              include: { channel: true }
+            });
+          } else {
+            await prisma.user.update({
+              where: { id: foundUser.id },
+              data: {
+                telegramChatId: BigInt(chatId),
+                telegramUsername: update.message.from?.username || 'hasanxontoxtayev',
+              }
+            });
+          }
+
+          if (foundUser.channel?.customUrl) {
+            pairedChannelHandle = foundUser.channel.customUrl.replace('@', '');
+          }
+        } catch (dbErr) {
+          console.warn('DB channel chat pairing error:', dbErr);
         }
 
         const bottomKeyboard = {
