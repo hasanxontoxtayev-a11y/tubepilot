@@ -130,41 +130,69 @@ export async function GET(req: NextRequest) {
       });
       activeUserId = currentUser.id;
 
-      if (channelItem?.id) {
-        await prisma.youTubeChannel.upsert({
-          where: { id: channelItem.id },
-          create: {
-            id: channelItem.id,
-            userId: activeUserId,
-            title: channelTitle,
-            description: channelItem.snippet?.description,
-            customUrl: channelHandle,
-            thumbnailUrl: channelAvatar,
-            subscriberCount: BigInt(channelSubs),
-            videoCount: Number(channelItem.statistics?.videoCount || 0),
-            viewCount: BigInt(channelViews),
-            encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : 'token',
-            encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : 'token',
-            tokenExpiresAt: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
-            tokenScope: tokens.scope || '',
-          },
-          update: {
-            userId: activeUserId,
-            title: channelTitle,
-            customUrl: channelHandle,
-            thumbnailUrl: channelAvatar,
-            subscriberCount: BigInt(channelSubs),
-            videoCount: Number(channelItem.statistics?.videoCount || 0),
-            viewCount: BigInt(channelViews),
-            encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : undefined,
-            encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : undefined,
-            tokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-            tokenScope: tokens.scope || undefined,
-          },
-        });
-      }
+      // Always ensure a YouTubeChannel record exists for this user in database,
+      // even if YouTube Data API returned no channelItem (e.g. brand channel or fallback resolution)
+      const chId = channelItem?.id || (channelHandle ? `UC_${channelHandle.replace(/[^a-zA-Z0-9_-]/g, '')}` : `UC_${activeUserId.slice(0, 18)}`);
+      
+      const cleanSubCount = (() => {
+        try {
+          const raw = String(channelSubs || '0').replace(/,/g, '').trim().toUpperCase();
+          const match = raw.match(/([\d\.]+)\s*([KMB])?/);
+          if (!match) return BigInt(0);
+          const num = parseFloat(match[1]);
+          const mult = match[2] === 'K' ? 1e3 : match[2] === 'M' ? 1e6 : match[2] === 'B' ? 1e9 : 1;
+          return BigInt(Math.round(num * mult));
+        } catch {
+          return BigInt(0);
+        }
+      })();
+
+      const cleanViewCount = (() => {
+        try {
+          const raw = String(channelViews || '0').replace(/,/g, '').trim().toUpperCase();
+          const match = raw.match(/([\d\.]+)\s*([KMB])?/);
+          if (!match) return BigInt(0);
+          const num = parseFloat(match[1]);
+          const mult = match[2] === 'K' ? 1e3 : match[2] === 'M' ? 1e6 : match[2] === 'B' ? 1e9 : 1;
+          return BigInt(Math.round(num * mult));
+        } catch {
+          return BigInt(0);
+        }
+      })();
+
+      await prisma.youTubeChannel.upsert({
+        where: { userId: activeUserId },
+        create: {
+          id: chId,
+          userId: activeUserId,
+          title: channelTitle,
+          description: channelItem?.snippet?.description || null,
+          customUrl: channelHandle,
+          thumbnailUrl: channelAvatar,
+          subscriberCount: cleanSubCount,
+          videoCount: Number(channelItem?.statistics?.videoCount || 0),
+          viewCount: cleanViewCount,
+          encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : 'token',
+          encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : 'token',
+          tokenExpiresAt: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
+          tokenScope: tokens.scope || '',
+        },
+        update: {
+          id: chId,
+          title: channelTitle,
+          customUrl: channelHandle,
+          thumbnailUrl: channelAvatar,
+          subscriberCount: cleanSubCount,
+          videoCount: Number(channelItem?.statistics?.videoCount || 0),
+          viewCount: cleanViewCount,
+          encryptedAccessToken: tokens.access_token ? encryptToken(tokens.access_token) : undefined,
+          encryptedRefreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : undefined,
+          tokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+          tokenScope: tokens.scope || undefined,
+        },
+      });
     } catch (dbErr) {
-      console.warn('[OAuth Callback] Database persistence bypassed for serverless:', dbErr);
+      console.warn('[OAuth Callback] Database persistence error:', dbErr);
     }
 
     const channelData = {
