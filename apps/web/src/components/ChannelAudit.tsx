@@ -55,8 +55,10 @@ export function ChannelAudit({
 }: ChannelAuditProps = {}) {
   const params = useParams();
   const currentLocale = (params?.locale as string) || 'uz';
-  const initialHandle = connectedHandle || connectedChannel?.handle || '';
-  const [query, setQuery] = useState(initialHandle);
+  // SECURITY & MULTI-TENANT PRIVACY:
+  // Never initialize or auto-populate query/auditData with any connected channel.
+  // It must always start strictly blank.
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [auditData, setAuditData] = useState<any>(null);
   const [showCompetitorSpy, setShowCompetitorSpy] = useState(false);
@@ -130,16 +132,12 @@ export function ChannelAudit({
   };
 
   useEffect(() => {
-    const target = connectedHandle || connectedChannel?.handle;
-    if (target) {
-      setQuery(target);
-      fetchAudit(target);
-    } else {
-      // If user has not connected any channel, show neutral popular channel or empty
-      setQuery('');
-      setAuditData(null);
-    }
-  }, [connectedHandle, connectedChannel?.handle]);
+    // SECURITY & MULTI-TENANT ISOLATION:
+    // Do NOT automatically auto-fill or persist previous search queries across sessions!
+    // The audit section MUST remain neutral and empty by default until the user explicitly searches.
+    setQuery('');
+    setAuditData(null);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -752,7 +750,27 @@ export function ChannelAudit({
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="p-12 sm:p-16 rounded-2xl bg-dark-900/40 border border-dashed border-slate-700/60 flex flex-col items-center justify-center text-center space-y-3 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-1 shadow-lg shadow-cyan-950/20">
+            <Search className="w-7 h-7" />
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-white">
+            {currentLocale === 'ru' 
+              ? 'Канал не выбран для аудита' 
+              : currentLocale === 'en' 
+              ? 'No channel selected for audit' 
+              : 'Audit qilish uchun kanal tanlanmagan'}
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-md">
+            {currentLocale === 'ru'
+              ? 'Введите @handle или название канала в поле поиска выше или выберите пример, чтобы запустить глубокий анализ.'
+              : currentLocale === 'en'
+              ? 'Enter a @handle or channel name in the search bar above or pick an example to run a deep diagnostic.'
+              : 'Kanal @handle yoki nomini yuqoridagi qidiruv maydoniga yozing yoki namunalardan birini tanlab, chuqur tahlilni boshlang.'}
+          </p>
+        </div>
+      )}
     </section>
   );
 }
