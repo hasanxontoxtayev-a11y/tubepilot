@@ -37,18 +37,6 @@ export function TelegramPairingCard({
   useEffect(() => {
     let interval: any = null;
 
-    // Check localStorage fallback for pairing state first
-    try {
-      const savedTg = localStorage.getItem('tubepilot_tg_paired');
-      if (savedTg) {
-        const parsed = JSON.parse(savedTg);
-        if (parsed?.paired) {
-          setPaired(true);
-          if (parsed.username) setUsername(parsed.username);
-        }
-      }
-    } catch {}
-
     const checkStatus = async () => {
       try {
         const queryParam = connectedHandle ? `?handle=${encodeURIComponent(connectedHandle)}` : '';
@@ -58,12 +46,15 @@ export function TelegramPairingCard({
           setPaired(true);
           if (data.telegramUsername) {
             setUsername(data.telegramUsername);
-            try {
-              localStorage.setItem('tubepilot_tg_paired', JSON.stringify({ paired: true, username: data.telegramUsername }));
-            } catch {}
           }
           if (onPairSuccess) onPairSuccess(data.telegramUsername);
           if (interval) clearInterval(interval);
+        } else {
+          setPaired(false);
+          setUsername(null);
+          try {
+            localStorage.removeItem('tubepilot_tg_paired');
+          } catch {}
         }
       } catch (err) {
         // silent fail
@@ -141,10 +132,22 @@ export function TelegramPairingCard({
         </div>
 
         {paired ? (
-          <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4" />
-            Ulangan: {username ? `@${username}` : '@tubepilotai_bot'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 animate-fadeIn">
+              <CheckCircle2 className="w-4 h-4" />
+              Ulangan: {username ? `@${username}` : '@tubepilotai_bot'}
+            </span>
+            <button
+              type="button"
+              onClick={generateLink}
+              disabled={loading}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/30 transition-all"
+              title="Boshqa Telegram hisobiga yoki yangi kanalga qayta ulash"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Qayta ulash</span>
+            </button>
+          </div>
         ) : (
           <span className="px-3 py-1 text-xs font-bold rounded-full bg-slate-700/40 text-slate-400 border border-slate-600/40">
             Ulanmagan

@@ -12,34 +12,41 @@ export async function POST(req: NextRequest) {
     }
 
     if (userId) {
-      // Disconnect only this user's channel, never all users!
+      // 1. Disconnect only this user's channel
       await prisma.youTubeChannel.deleteMany({
         where: { userId },
       });
 
-      // Reset user title/avatar
+      // 2. Unlink Telegram pairing and reset user state in database
+      const userChatId = user?.telegramChatId ? user.telegramChatId.toString() : null;
+
       await prisma.user.updateMany({
         where: { id: userId },
         data: {
           name: null,
           avatarUrl: null,
+          telegramChatId: null,
+          telegramUserId: null,
+          telegramUsername: null,
+          telegramPairToken: null,
+          telegramPairTokenExp: null,
         },
       });
 
-      // If Telegram bot is paired, send a notification
-      if (user?.telegramChatId) {
+      // 3. If Telegram bot was paired, notify and reset session in Telegram
+      if (userChatId) {
         try {
           const botToken = process.env.TELEGRAM_BOT_TOKEN || '9077748091:AAEFiPyxWo1aUm3oq04bqA4RKj8SKugbdrM';
           const msg =
-            `ℹ️ **YouTube Ishchi Maydoni Uzildi / Workspace Disconnected**\n\n` +
-            `Kanalingiz muvaffaqiyatli uzildi. Yangi shaxsiy kanalingizni ulash uchun boshqaruv paneliga kiring:\n` +
-            `👉 http://localhost:3001/uz/dashboard`;
+            `ℹ️ **YouTube Ishchi Maydoni va Telegram Bog'lanishi Uzildi**\n\n` +
+            `Kanalingiz saytdan uzildi. Yangi YouTube kanalini ulash va botni qayta faollashtirish uchun boshqaruv paneliga kiring:\n` +
+            `👉 [tubepilotpro.com](https://www.tubepilotpro.com/uz/dashboard)`;
 
           await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              chat_id: user.telegramChatId.toString(),
+              chat_id: userChatId,
               text: msg,
               parse_mode: 'Markdown',
             }),
