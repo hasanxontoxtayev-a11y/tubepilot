@@ -11,10 +11,12 @@ export async function POST(req: NextRequest) {
       if (user) userId = user.id;
     }
 
-    // Completely flush connected YouTube channels from SQLite database
-    await prisma.youTubeChannel.deleteMany({});
-
     if (userId) {
+      // Disconnect only this user's channel, never all users!
+      await prisma.youTubeChannel.deleteMany({
+        where: { userId },
+      });
+
       // Reset user title/avatar
       await prisma.user.updateMany({
         where: { id: userId },
