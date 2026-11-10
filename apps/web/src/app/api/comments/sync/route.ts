@@ -192,8 +192,11 @@ import { prisma } from '@kanal/db';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const channelParam = searchParams.get('channel') || searchParams.get('handle') || '@Beatnova-g3v';
+    const channelParam = searchParams.get('channel') || searchParams.get('handle') || '';
     const channel = channelParam.trim();
+    if (!channel) {
+      return NextResponse.json({ success: true, comments: [] });
+    }
 
     const comments = await fetchLiveYouTubeComments(channel);
 

@@ -36,7 +36,8 @@ export async function GET(req: NextRequest) {
     for (const user of users) {
       if (!user.telegramChatId) continue;
       const chatId = user.telegramChatId.toString();
-      const channelHandle = user.channel?.customUrl || `@${user.name || 'Beatnova-g3v'}`;
+      const channelHandle = user.channel?.customUrl || (user.name ? `@${user.name}` : null);
+      if (!channelHandle) continue;
 
       try {
         // Run fresh audit on channel to inspect latest videos & statistics

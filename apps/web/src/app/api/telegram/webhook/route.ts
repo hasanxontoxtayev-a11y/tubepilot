@@ -246,62 +246,81 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true });
       }
 
-      // Check if start command has strict channel pairing payload (e.g. /start pair_Beatnova-g3v)
+      // Check if start command has pairing payload (e.g. /start link_TOKEN or /start pair_HANDLE)
       if (text.startsWith('/start')) {
-        const match = text.match(/^\/start\s+(pair_([a-zA-Z0-9_\-]+)|link_([a-zA-Z0-9_\-]+))/);
+        const match = text.match(/^\/start\s+(link_([a-zA-Z0-9_\-]+)|pair_([a-zA-Z0-9_\-]+))/);
         let pairedChannelHandle: string | undefined = undefined;
+        let pairedChannelTitle: string | undefined = undefined;
 
-        if (match) {
-          const handle = match[2] || match[3];
-          if (handle) {
-            pairedChannelHandle = handle;
-            channelChatBindings.set(handle.toLowerCase(), chatId);
-          }
-        }
-
-        // Always ensure this chatId is persisted to DB!
         try {
           const { prisma } = await import('@kanal/db');
-          const cleanH = (pairedChannelHandle || 'beatnova-g3v').toLowerCase();
-          
-          let foundUser = await prisma.user.findFirst({
-            where: {
-              OR: [
-                { telegramChatId: BigInt(chatId) },
-                { channel: { customUrl: { contains: cleanH } } },
-                { email: 'hasanxontoxtayev@gmail.com' }
-              ]
-            },
-            include: { channel: true }
-          });
+          const tgChatBigInt = BigInt(chatId);
+          const tgUserStr = update.message.from?.username || firstName || 'User';
 
-          if (!foundUser) {
-            foundUser = await prisma.user.create({
+          let matchedUser = null;
+
+          if (match) {
+            const tokenOrHandle = match[2] || match[3];
+            const isLinkToken = Boolean(match[2]);
+
+            if (isLinkToken) {
+              // 1. Direct Pairing by secure telegramPairToken generated in Web app!
+              matchedUser = await prisma.user.findFirst({
+                where: { telegramPairToken: tokenOrHandle },
+                include: { channel: true }
+              });
+            } else {
+              // 2. Pairing by channel handle
+              const cleanH = tokenOrHandle.toLowerCase();
+              matchedUser = await prisma.user.findFirst({
+                where: { channel: { customUrl: { contains: cleanH } } },
+                include: { channel: true }
+              });
+            }
+          }
+
+          // If no specific token was matched, check if this Telegram user was already registered
+          if (!matchedUser) {
+            matchedUser = await prisma.user.findFirst({
+              where: { telegramChatId: tgChatBigInt },
+              include: { channel: true }
+            });
+          }
+
+          if (matchedUser) {
+            // Strictly bind Telegram Chat ID & username to this user's workspace
+            await prisma.user.update({
+              where: { id: matchedUser.id },
               data: {
-                email: 'hasanxontoxtayev@gmail.com',
-                name: firstName || 'BeatNova',
-                telegramChatId: BigInt(chatId),
-                telegramUsername: update.message.from?.username || 'hasanxontoxtayev',
+                telegramChatId: tgChatBigInt,
+                telegramUsername: tgUserStr,
+                telegramPairToken: null, // Clear used token
+              }
+            });
+
+            if (matchedUser.channel) {
+              pairedChannelHandle = matchedUser.channel.customUrl?.replace('@', '') || undefined;
+              pairedChannelTitle = matchedUser.channel.title;
+              if (pairedChannelHandle) {
+                channelChatBindings.set(pairedChannelHandle.toLowerCase(), chatId);
+              }
+            }
+          } else {
+            // Create user session for fresh Telegram direct onboarding
+            const newUser = await prisma.user.create({
+              data: {
+                email: `tg_${chatId}@creator.tubepilot.ai`,
+                name: firstName,
+                telegramChatId: tgChatBigInt,
+                telegramUsername: tgUserStr,
                 subscriptionTier: 'PRO',
                 subscriptionStatus: 'ACTIVE',
               },
               include: { channel: true }
             });
-          } else {
-            await prisma.user.update({
-              where: { id: foundUser.id },
-              data: {
-                telegramChatId: BigInt(chatId),
-                telegramUsername: update.message.from?.username || 'hasanxontoxtayev',
-              }
-            });
-          }
-
-          if (foundUser.channel?.customUrl) {
-            pairedChannelHandle = foundUser.channel.customUrl.replace('@', '');
           }
         } catch (dbErr) {
-          console.warn('DB channel chat pairing error:', dbErr);
+          console.warn('[Webhook] DB channel chat pairing error:', dbErr);
         }
 
         const bottomKeyboard = {
