@@ -254,12 +254,22 @@ export async function GET(req: NextRequest) {
               where: { id: item.id },
             });
 
-            const draftReply =
-              item.detectedLanguage === 'Russian'
-                ? `Привет, ${item.authorDisplayName}! Большое спасибо за поддержку и отзыв! 👍`
-                : item.detectedLanguage === 'English'
-                ? `Hey ${item.authorDisplayName}! Thanks so much for watching and for your awesome feedback! 🚀`
-                : `Assalomu alaykum ${item.authorDisplayName}! Fikringiz va e'tiboringiz uchun kattakon rahmat! 🚀`;
+            // Use Gemini Multilingual AI to craft reply in the exact source language (French, Turkish, Kazakh, etc.)
+            let draftReply = '';
+            let detectedLang = item.detectedLanguage || 'English';
+            try {
+              const { GeminiService } = await import('@kanal/ai');
+              const drafted = await GeminiService.draftCommentReply(item.originalText);
+              draftReply = drafted.draftReply;
+              detectedLang = drafted.detectedLanguage;
+            } catch {
+              draftReply =
+                item.detectedLanguage === 'Russian'
+                  ? `Привет, ${item.authorDisplayName}! Большое спасибо за поддержку и отзыв! 👍`
+                  : item.detectedLanguage === 'English'
+                  ? `Hey ${item.authorDisplayName}! Thanks so much for watching and for your awesome feedback! 🚀`
+                  : `Assalomu alaykum ${item.authorDisplayName}! Fikringiz va e'tiboringiz uchun kattakon rahmat! 🚀`;
+            }
 
             if (!existing) {
               await prisma.commentThread.create({
@@ -269,19 +279,22 @@ export async function GET(req: NextRequest) {
                   userId: user.id,
                   authorDisplayName: item.authorDisplayName,
                   originalText: item.originalText,
-                  detectedLanguage: item.detectedLanguage,
+                  detectedLanguage: detectedLang,
                   publishedAt: new Date(),
                   aiDraftReply: draftReply,
                   approvalStatus: 'PENDING',
                 },
               });
 
-              // Dispatch instant Telegram notification card
+              // Dispatch instant Telegram notification card with 3 action buttons
               const keyboard = {
                 inline_keyboard: [
                   [
                     { text: '✅ Tasdiqlash / Approve', callback_data: `approve_comment:${item.id}` },
-                    { text: '🗑️ Bekor qilish / Discard', callback_data: `discard_comment:${item.id}` },
+                    { text: '❌ Rad etish / Dismiss', callback_data: `dismiss_comment:${item.id}` },
+                  ],
+                  [
+                    { text: '✍️ Tahrirlash / Custom Reply', callback_data: `edit_comment:${item.id}` },
                   ],
                 ],
               };

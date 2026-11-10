@@ -30,15 +30,16 @@ const i18nTexts = {
     btnVision: '🖼️ Muqova Tahlili (CTR)',
     btnLang: '🌐 Tilni Tanlash',
     helpPrompt: 'YouTube bo\'yicha istalgan savolingizni yozing yoki video muqovasi (thumbnail) rasmini yuboring:',
-    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+    commentHeader: (author: string, video: string, text: string, aiDraft: string, langName?: string) =>
       `💬 **Haqiqiy YouTube Izohi:**\n\n` +
-      `👤 **Tomoshabin:** ${author}\n` +
+      `👤 **Tomoshabin:** ${author}${langName ? ` (${langName})` : ''}\n` +
       `🎬 **Video:** ${video}\n` +
       `📝 **Izoh:** "${text}"\n\n` +
-      `🤖 **AI Tayyorlagan Javob:**\n` +
+      `🤖 **AI Tayyorlagan Javob (${langName || 'Tilga mos'}):**\n` +
       `"${aiDraft}"`,
     btnApprove: '✅ Tasdiqlash va Yuborish',
     btnDismiss: '❌ Rad etish',
+    btnEdit: '✍️ Tahrirlash / Javob yozish',
     noCommentsFound: 'Oxirgi 7 kunda yangi izohlar topilmadi yoki barcha izohlarga javob berilgan! Yangi izoh tushishi bilan bot sizga darhol xabar qiladi.',
   },
   ru: {
@@ -62,15 +63,16 @@ const i18nTexts = {
     btnVision: '🖼️ Оценка Обложки (CTR)',
     btnLang: '🌐 Выбрать Язык',
     helpPrompt: 'Задайте любой вопрос по YouTube или отправьте картинку обложки видео для анализа:',
-    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+    commentHeader: (author: string, video: string, text: string, aiDraft: string, langName?: string) =>
       `💬 **Реальный комментарий с YouTube:**\n\n` +
-      `👤 **Зритель:** ${author}\n` +
+      `👤 **Зритель:** ${author}${langName ? ` (${langName})` : ''}\n` +
       `🎬 **Видео:** ${video}\n` +
       `📝 **Текст:** "${text}"\n\n` +
-      `🤖 **Ответ, сгенерированный ИИ:**\n` +
+      `🤖 **Ответ, сгенерированный ИИ (${langName || 'На языке автора'}):**\n` +
       `"${aiDraft}"`,
     btnApprove: '✅ Одобрить и отправить',
     btnDismiss: '❌ Отклонить',
+    btnEdit: '✍️ Изменить / Ответить лично',
     noCommentsFound: 'За последние 7 дней новых комментариев не найдено или на них уже отвечено. Как только появится новый — бот сразу уведомит вас!',
   },
   en: {
@@ -94,15 +96,16 @@ const i18nTexts = {
     btnVision: '🖼️ Thumbnail CTR Vision',
     btnLang: '🌐 Change Language',
     helpPrompt: 'Ask any strategic YouTube growth question or send a thumbnail image to calculate CTR:',
-    commentHeader: (author: string, video: string, text: string, aiDraft: string) =>
+    commentHeader: (author: string, video: string, text: string, aiDraft: string, langName?: string) =>
       `💬 **Live YouTube Comment:**\n\n` +
-      `👤 **Viewer:** ${author}\n` +
+      `👤 **Viewer:** ${author}${langName ? ` (${langName})` : ''}\n` +
       `🎬 **Video:** ${video}\n` +
       `📝 **Comment:** "${text}"\n\n` +
-      `🤖 **AI Generated Reply:**\n` +
+      `🤖 **AI Generated Reply (${langName || 'Native language'}):**\n` +
       `"${aiDraft}"`,
     btnApprove: '✅ Approve & Publish',
     btnDismiss: '❌ Dismiss',
+    btnEdit: '✍️ Custom Reply',
     noCommentsFound: 'No unresolved comments found in the last 7 days. As soon as a viewer comments, TubePilot AI will ping you instantly!',
   }
 };
@@ -207,6 +210,31 @@ export async function POST(req: NextRequest) {
               text: `${cb.message?.text || ''}\n\n⚪ **[RAD ETILDI]**`,
               parse_mode: 'Markdown',
               reply_markup: { inline_keyboard: [] },
+            }),
+          });
+        }
+        return NextResponse.json({ ok: true });
+      }
+
+      if (callbackData.startsWith('edit_comment:')) {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            callback_query_id: cb.id,
+            text: '✍️ O\'z javobingizni shu yerga xabar qilib yozing:',
+            show_alert: true,
+          }),
+        });
+
+        if (chatId) {
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: `✍️ **Ushbu izoh uchun o'z shaxsiy javobingizni yozing:**\n\nJavobingizni quyida oddiy xabar sifatida yuboring, TubePilot AI uni YouTube'ga joylaydi.`,
+              parse_mode: 'Markdown',
             }),
           });
         }
@@ -439,26 +467,35 @@ export async function POST(req: NextRequest) {
 
         // Deliver up to 5 real comments from the last 7 days with AI suggestions
         for (const c of commentsList.slice(0, 5)) {
-          const aiDraft = c.aiDraft || (
-            currentLang === 'ru'
-              ? 'Спасибо огромное за просмотр и отзыв! Мы ценим вашу поддержку! 🔥'
-              : currentLang === 'en'
-              ? 'Thank you so much for watching and sharing your feedback! More content coming soon! 🚀'
-              : 'Assalomu alaykum! Fikringiz va e\'tiboringiz uchun kattakon rahmat! 🎧🔥'
-          );
+          let aiDraft = c.aiDraft;
+          let langName = c.detectedLanguage || '';
+
+          if (!aiDraft) {
+            try {
+              const { GeminiService } = await import('@kanal/ai');
+              const drafted = await GeminiService.draftCommentReply(c.originalText);
+              aiDraft = drafted.draftReply;
+              langName = drafted.detectedLanguage;
+            } catch {
+              aiDraft = c.originalText.length > 0 ? `Thanks for your comment! 🔥` : `Rahmat!`;
+            }
+          }
 
           await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               chat_id: chatId,
-              text: t.commentHeader(c.authorDisplayName || '@tomoshabin', c.videoTitle || 'YouTube Video', c.originalText, aiDraft),
+              text: t.commentHeader(c.authorDisplayName || '@tomoshabin', c.videoTitle || 'YouTube Video', c.originalText, aiDraft, langName),
               parse_mode: 'Markdown',
               reply_markup: {
                 inline_keyboard: [
                   [
                     { text: t.btnApprove, callback_data: `approve_comment:${c.id}` },
                     { text: t.btnDismiss, callback_data: `dismiss_comment:${c.id}` }
+                  ],
+                  [
+                    { text: t.btnEdit, callback_data: `edit_comment:${c.id}` }
                   ]
                 ]
               }
